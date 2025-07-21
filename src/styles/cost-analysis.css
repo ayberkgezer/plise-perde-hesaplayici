@@ -1,0 +1,194 @@
+/* Maliyet Analizi - Özel Stiller */
+.cost-analysis-section {
+    margin-top: 24px !important;
+    border: 2px solid #e3f2fd;
+    border-radius: 12px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8f9ff 0%, #e8f4fd 100%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Hesaplama Özeti */
+.calculation-summary {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.price-summary-card {
+    background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+    color: white;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    min-width: 300px;
+    transition: all 0.3s;
+}
+
+.price-summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
+.cost-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #2196f3;
+}
+
+.cost-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cost-icon {
+    font-size: 24px;
+    background: #2196f3;
+    color: white;
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+}
+
+.cost-title h3 {
+    margin: 0;
+    color: #1976d2;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.danger-btn {
+    background: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.danger-btn:hover {
+    background: #d32f2f;
+    transform: translateY(-1px);
+}
+
+.cost-table-wrapper {
+    margin: 20px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cost-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    font-size: 14px;
+}
+
+.cost-table th {
+    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    color: white;
+    padding: 12px 10px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.cost-table td {
+    padding: 10px;
+    border-bottom: 1px solid #e0e0e0;
+    vertical-align: middle;
+}
+
+.cost-table tbody tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.cost-table tbody tr:hover {
+    background: #e3f2fd;
+    transition: all 0.2s;
+}
+
+.cost-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.cost-summary-item {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #2196f3;
+}
+
+.cost-total {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1976d2;
+    text-align: center;
+}
+
+.revenue-total {
+    font-size: 16px;
+    font-weight: 600;
+    color: #7b1fa2;
+    text-align: center;
+}
+
+.profit-total {
+    font-size: 16px;
+    font-weight: 600;
+    color: #388e3c;
+    text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .cost-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .cost-table {
+        font-size: 12px;
+    }
+    
+    .cost-table th,
+    .cost-table td {
+        padding: 8px 6px;
+    }
+    
+    .cost-summary {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .cost-total,
+    .revenue-total,
+    .profit-total {
+        font-size: 14px;
+    }
+    
+    .price-summary-card {
+        font-size: 18px;
+        padding: 12px 24px;
+        min-width: auto;
+    }
+}

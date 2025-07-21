@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="src/styles/style.css">
+    <link rel="stylesheet" href="src/styles/cost-analysis.css">
     <style>
         /* Desktop Window Controls */
         .title-bar {
@@ -337,25 +338,29 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="summary-section">
-                        <div id="totalPrice" class="total-price">
-                            <span class="icon icon-money"></span>Toplam Tutar: 0 TL
+                    
+                    <!-- Hesaplama Özeti -->
+                    <div class="calculation-summary">
+                        <div id="totalPrice" class="price-summary-card">
+                            💰 Toplam Satış Tutarı: 0 TL
                         </div>
                     </div>
                 </div>
 
                 <!-- Maliyet Analizi Bölümü -->
-                <div id="costAnalysis" class="container">
-                    <div class="results-header">
-                        <h2 class="results-title"><span class="icon icon-calculator"></span> Maliyet Analizi</h2>
-                        <div class="results-actions">
-                            <button id="clearCostBtn" class="danger modern-btn">
-                                <span class="icon icon-trash"></span> Maliyetleri Temizle
-                            </button>
+                <div id="costAnalysis" class="container cost-analysis-section" style="display: none;">
+                    <div class="cost-header">
+                        <div class="cost-title">
+                            <span class="cost-icon">📊</span>
+                            <h3>Maliyet Analizi</h3>
                         </div>
+                        <button id="clearCostBtn" class="danger-btn">
+                            🗑️ Temizle
+                        </button>
                     </div>
-                    <div class="table-container">
-                        <table class="modern-table">
+                    
+                    <div class="cost-table-wrapper">
+                        <table class="cost-table">
                             <thead>
                                 <tr>
                                     <th>Adet</th>
@@ -372,12 +377,22 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="summary-section">
-                        <div id="totalCost" class="total-price">
-                            <span class="icon icon-calculator"></span>Toplam Maliyet: 0 TL
+                    
+                    <div class="cost-summary">
+                        <div class="cost-summary-item">
+                            <div id="totalRevenue" class="revenue-total">
+                                💸 Toplam Satış: 0 TL
+                            </div>
                         </div>
-                        <div id="totalProfit" class="total-price" style="color: #10b981; margin-top: 8px;">
-                            <span class="icon icon-money"></span>Toplam Kar: 0 TL
+                        <div class="cost-summary-item">
+                            <div id="totalCost" class="cost-total">
+                                💰 Toplam Maliyet: 0 TL
+                            </div>
+                        </div>
+                        <div class="cost-summary-item">
+                            <div id="totalProfit" class="profit-total">
+                                📈 Toplam Kar: 0 TL
+                            </div>
                         </div>
                     </div>
                 </div>

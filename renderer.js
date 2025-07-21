@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const costTable = document.getElementById('costTable');
     const totalCostEl = document.getElementById('totalCost');
     const totalProfitEl = document.getElementById('totalProfit');
+    const totalRevenueEl = document.getElementById('totalRevenue');
 
     // Cost Settings Elements
     const fixedCostPerUnitInput = document.getElementById('fixedCostPerUnit');
@@ -255,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const total = calculations.reduce((sum, calc) => sum + parseFloat(calc.price), 0);
         if (totalPriceEl) {
-            totalPriceEl.innerHTML = `<span class="icon-money" style="margin-right: 0.5rem;"></span>Toplam Tutar: ${total.toFixed(2)} TL`;
+            totalPriceEl.innerHTML = `💰 Toplam Satış Tutarı: ${total.toFixed(2)} TL`;
         }
         
         // Show/hide results container based on calculations
@@ -348,11 +349,15 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Update totals
         const totalProfit = totalRevenue - totalCost;
+        if (totalRevenueEl) {
+            totalRevenueEl.innerHTML = `💸 Toplam Satış: ${totalRevenue.toFixed(2)} TL`;
+        }
         if (totalCostEl) {
-            totalCostEl.innerHTML = `<span class="icon-calculator" style="margin-right: 0.5rem;"></span>Toplam Maliyet: ${totalCost.toFixed(2)} TL`;
+            totalCostEl.innerHTML = `💰 Toplam Maliyet: ${totalCost.toFixed(2)} TL`;
         }
         if (totalProfitEl) {
-            totalProfitEl.innerHTML = `<span class="icon-money" style="margin-right: 0.5rem;"></span>Toplam Kar: ${totalProfit.toFixed(2)} TL (${totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0}%)`;
+            totalProfitEl.innerHTML = `📈 Toplam Kar: ${totalProfit.toFixed(2)} TL (${totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0}%)`;
+            totalProfitEl.style.color = totalProfit >= 0 ? '#388e3c' : '#ef4444';
         }
 
         showNotification('Maliyet analizi tamamlandı!', 'success');
@@ -382,11 +387,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function clearCostAnalysis() {
         costCalculations = [];
         if (costTable) costTable.innerHTML = '';
+        if (totalRevenueEl) {
+            totalRevenueEl.innerHTML = `💸 Toplam Satış: 0 TL`;
+        }
         if (totalCostEl) {
-            totalCostEl.innerHTML = `<span class="icon-calculator" style="margin-right: 0.5rem;"></span>Toplam Maliyet: 0 TL`;
+            totalCostEl.innerHTML = `💰 Toplam Maliyet: 0 TL`;
         }
         if (totalProfitEl) {
-            totalProfitEl.innerHTML = `<span class="icon-money" style="margin-right: 0.5rem;"></span>Toplam Kar: 0 TL`;
+            totalProfitEl.innerHTML = `📈 Toplam Kar: 0 TL`;
         }
         
         // Hide cost analysis section

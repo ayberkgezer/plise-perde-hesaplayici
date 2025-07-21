@@ -752,102 +752,57 @@ body {
     gap: var(--space-sm);
 }
 
-/* Remove logo from title bar since it's requested to remove it */
-.app-logo {
-    display: none;
+/* Modern Table Styles */
+.table-container {
+    overflow-x: auto;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin: var(--space-md) 0;
 }
 
-/* Maliyet Analizi Bölümü */
-#costAnalysis {
-    margin-top: var(--space-xl);
-    border-top: 2px solid var(--primary-light);
-    position: relative;
-    display: none;
-    background: var(--background-secondary);
+.modern-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface-color);
     border-radius: var(--radius-lg);
     overflow: hidden;
 }
 
-#costAnalysis::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-    border-radius: 1px;
-}
-
-#costAnalysis .results-title {
-    color: var(--primary-color);
-    margin-bottom: var(--space-md);
-    font-size: var(--font-size-lg);
-}
-
-#costAnalysis .modern-table {
-    margin-top: var(--space-sm);
-}
-
-#costAnalysis .modern-table th {
+.modern-table th {
     background: var(--primary-color);
     color: var(--text-light);
+    padding: var(--space-md);
+    text-align: left;
     font-weight: 600;
     font-size: var(--font-size-sm);
+}
+
+.modern-table td {
     padding: var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
 }
 
-#costAnalysis .modern-table td {
-    font-size: var(--font-size-sm);
-    font-weight: 500;
+.modern-table tbody tr:nth-child(even) {
+    background: var(--background-secondary);
 }
 
-#costAnalysis .modern-table tr:hover {
-    background: rgba(30, 60, 114, 0.05);
+.modern-table tbody tr:hover {
+    background: var(--surface-hover);
 }
 
-/* Buton Düzenleri */
-.button-group {
+.table-actions {
     display: flex;
-    gap: var(--space-sm);
-    flex-wrap: wrap;
-    align-items: center;
+    gap: var(--space-xs);
 }
 
-.button-group .modern-btn {
-    flex: 1;
-    min-width: 160px;
+.table-actions .modern-btn {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-xs);
+    min-height: 32px;
 }
 
-@media (max-width: 768px) {
-    .button-group .modern-btn {
-        flex: 1 1 100%;
-        min-width: auto;
-    }
-    
-    .input-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    #app-container {
-        flex-direction: column;
-        padding: var(--space-sm);
-        gap: var(--space-sm);
-    }
-    
-    #sidebar {
-        width: 100%;
-        height: auto;
-        border-right: none;
-        border-bottom: 1px solid var(--glass-border);
-    }
-    
-    .results-actions {
-        flex-direction: column;
-        gap: var(--space-xs);
-    }
-    
-    .results-actions .modern-btn {
-        width: 100%;
-    }
+/* Remove logo from title bar since it's requested to remove it */
+.app-logo {
+    display: none;
 }
