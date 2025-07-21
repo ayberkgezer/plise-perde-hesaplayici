@@ -84,7 +84,7 @@
     --space-4xl: 80px;
 }
 
-/* Modern Icons */
+/* Modern Icons - Sadece kullanılanlar */
 .icon {
     display: inline-flex;
     align-items: center;
@@ -100,7 +100,6 @@
 .icon-calculator::before { content: "📊"; }
 .icon-plus::before { content: "➕"; }
 .icon-database::before { content: "🗃️"; }
-.icon-chart::before { content: "📈"; }
 .icon-width::before { content: "↔️"; }
 .icon-height::before { content: "↕️"; }
 .icon-palette::before { content: "🎨"; }
@@ -109,174 +108,10 @@
 .icon-money::before { content: "💰"; }
 .icon-settings::before { content: "⚙️"; }
 .icon-trash::before { content: "🗑️"; }
-.icon-copy::before { content: "📋"; }
-.icon-check::before { content: "✔️"; }
 .icon-print::before { content: "🖨️"; }
 .icon-save::before { content: "💾"; }
-.icon-folder::before { content: "📁"; }
-.icon-info::before { content: "ℹ️"; }
-.icon-warning::before { content: "⚠️"; }
-.icon-error::before { content: "❌"; }
-.icon-search::before { content: "🔍"; }
-.icon-filter::before { content: "⚖️"; }
-.icon-sort::before { content: "⇅"; }
 .icon-edit::before { content: "✏️"; }
-.icon-user::before { content: "👤"; }
-.icon-export::before { content: "📤"; }
-.icon-import::before { content: "📥"; }
-.icon-refresh::before { content: "🔄"; }
-.icon-total::before { content: "Σ"; }
-.icon-area::before { content: "📏"; }
-.icon-price-tag::before { content: "🏷️"; }
-.icon-expand::before { content: "📐"; }
-.icon-close::before { content: "❌"; }
 .icon-times::before { content: "❌"; }
-.icon-tag::before { content: "🏷️"; }
-.icon-discount::before { content: "📉"; }
-.icon-tax::before { content: "🧾"; }
-.icon-shipping::before { content: "🚚"; }
-.icon-customer::before { content: "🏢"; }
-.icon-order::before { content: "🛒"; }
-.icon-date::before { content: "📅"; }
-.icon-time::before { content: "🕒"; }
-.icon-notes::before { content: "📝"; }
-.icon-status::before { content: "🚦"; }
-.icon-lock::before { content: "🔒"; }
-.icon-unlock::before { content: "🔓"; }
-.icon-theme::before { content: "🌓"; }
-.icon-language::before { content: "🌐"; }
-.icon-help::before { content: "❓"; }
-.icon-about::before { content: "🌟"; }
-.icon-quit::before { content: "🚪"; }
-.icon-undo::before { content: "↩️"; }
-.icon-redo::before { content: "↪️"; }
-.icon-cut::before { content: "✂️"; }
-.icon-paste::before { content: "📝"; }
-.icon-select-all::before { content: "✅"; }
-.icon-dev-tools::before { content: "⚙️"; }
-.icon-reload::before { content: "🔄"; }
-.icon-force-reload::before { content: "🔄"; }
-.icon-toggle-fullscreen::before { content: "↔️"; }
-.icon-reset-zoom::before { content: "🔍"; }
-.icon-zoom-in::before { content: "➕"; }
-.icon-zoom-out::before { content: "➖"; }
-.icon-github::before { content: "💻"; }
-.icon-website::before { content: "🌐"; }
-.icon-update::before { content: "⬆️"; }
-.icon-new-window::before { content: "➕"; }
-.icon-close-window::before { content: "❌"; }
-.icon-new-calculation::before { content: "➕"; }
-.icon-open-calculation::before { content: "📁"; }
-.icon-save-calculation::before { content: "💾"; }
-.icon-save-as::before { content: "💾"; }
-.icon-print-report::before { content: "🖨️"; }
-.icon-export-pdf::before { content: "📄"; }
-.icon-export-excel::before { content: "📊"; }
-.icon-preferences::before { content: "⚙️"; }
-.icon-quit-app::before { content: "🚪"; }
-.icon-add-fabric::before { content: "➕"; }
-.icon-edit-fabric::before { content: "✏️"; }
-.icon-delete-fabric::before { content: "🗑️"; }
-.icon-import-fabrics::before { content: "📥"; }
-.icon-export-fabrics::before { content: "📤"; }
-.icon-generate-report::before { content: "📈"; }
-.icon-view-report::before { content: "📄"; }
-.icon-delete-report::before { content: "🗑️"; }
-.icon-toggle-dev-tools::before { content: "⚙️"; }
-.icon-check-for-updates::before { content: "⬆️"; }
-.icon-documentation::before { content: "📚"; }
-.icon-release-notes::before { content: "📝"; }
-.icon-report-issue::before { content: "🐛"; }
-.icon-about-app::before { content: "🌟"; }
-.icon-learn-more::before { content: "🎓"; }
-.icon-privacy-policy::before { content: "🔒"; }
-.icon-terms-of-service::before { content: "📜"; }
-.icon-community::before { content: "👨‍👩‍👧‍👦"; }
-.icon-blog::before { content: "📰"; }
-.icon-twitter::before { content: "🐦"; }
-.icon-facebook::before { content: "👍"; }
-.icon-linkedin::before { content: "🔗"; }
-.icon-youtube::before { content: "▶️"; }
-.icon-instagram::before { content: "📸"; }
-.icon-discord::before { content: "💬"; }
-.icon-slack::before { content: "💬"; }
-.icon-telegram::before { content: "✈️"; }
-.icon-whatsapp::before { content: "💬"; }
-.icon-email::before { content: "📧"; }
-.icon-phone::before { content: "📞"; }
-.icon-address::before { content: "🏠"; }
-.icon-website-link::before { content: "🌐"; }
-.icon-support::before { content: "🤝"; }
-.icon-feedback::before { content: "📝"; }
-.icon-star::before { content: "⭐"; }
-.icon-fork::before { content: "🍴"; }
-.icon-watch::before { content: "👀"; }
-.icon-download::before { content: "📥"; }
-.icon-upload::before { content: "📤"; }
-.icon-share::before { content: "🔗"; }
-.icon-link::before { content: "🔗"; }
-.icon-attachment::before { content: "📎"; }
-.icon-calendar::before { content: "📅"; }
-.icon-clock::before { content: "🕒"; }
-.icon-tag::before { content: "🏷️"; }
-.icon-category::before { content: "📁"; }
-.icon-project::before { content: "🏗️"; }
-.icon-task::before { content: "✔️"; }
-.icon-milestone::before { content: "🏁"; }
-.icon-bug::before { content: "🐛"; }
-.icon-feature::before { content: "💡"; }
-.icon-pull-request::before { content: "🔀"; }
-.icon-commit::before { content: "📌"; }
-.icon-branch::before { content: "🌿"; }
-.icon-merge::before { content: "🔀"; }
-.icon-code::before { content: "💻"; }
-.icon-terminal::before { content: "⌨️"; }
-.icon-console::before { content: "🖥️"; }
-.icon-debug::before { content: "🐞"; }
-.icon-play::before { content: "▶️"; }
-.icon-pause::before { content: "⏸️"; }
-.icon-stop::before { content: "⏹️"; }
-.icon-record::before { content: "⏺️"; }
-.icon-next::before { content: "⏭️"; }
-.icon-previous::before { content: "⏮️"; }
-.icon-first::before { content: "⏪"; }
-.icon-last::before { content: "⏩"; }
-.icon-up::before { content: "🔼"; }
-.icon-down::before { content: "🔽"; }
-.icon-left::before { content: "◀️"; }
-.icon-right::before { content: "▶️"; }
-.icon-expand-all::before { content: "➕"; }
-.icon-collapse-all::before { content: "➖"; }
-.icon-sort-asc::before { content: "🔼"; }
-.icon-sort-desc::before { content: "🔽"; }
-.icon-filter-clear::before { content: "❌"; }
-.icon-group-by::before { content: "📊"; }
-.icon-ungroup::before { content: "📊"; }
-.icon-view-grid::before { content: "🔲"; }
-.icon-view-list::before { content: "📜"; }
-.icon-view-kanban::before { content: "📋"; }
-.icon-view-gantt::before { content: "📊"; }
-.icon-view-calendar::before { content: "📅"; }
-.icon-view-timeline::before { content: "⏳"; }
-.icon-view-dashboard::before { content: "📊"; }
-.icon-view-form::before { content: "📝"; }
-.icon-view-map::before { content: "🗺️"; }
-.icon-view-pivot::before { content: "🔄"; }
-.icon-view-tree::before { content: "🌳"; }
-.icon-view-graph::before { content: "🔗"; }
-.icon-view-flow::before { content: "🌊"; }
-.icon-view-mindmap::before { content: "🧠"; }
-.icon-view-orgchart::before { content: "👨‍👩‍👧‍👦"; }
-.icon-view-sequence::before { content: "🔢"; }
-.icon-view-state::before { content: "🚦"; }
-.icon-view-uml::before { content: "📐"; }
-.icon-view-erd::before { content: "🔗"; }
-.icon-view-wireframe::before { content: "📝"; }
-.icon-view-mockup::before { content: "🖼️"; }
-.icon-view-prototype::before { content: "📱"; }
-.icon-view-design::before { content: "🎨"; }
-.icon-view-code::before { content: "💻"; }
-.icon-view-test::before { content: "✔️"; }
 
 /* Reset & Base Styles */
 * {
@@ -679,6 +514,7 @@ body {
     transition: var(--transition);
     position: relative;
     overflow: hidden;
+    display: none; /* Initially hidden */
 }
 
 #results.has-content {
@@ -831,130 +667,22 @@ body {
     opacity: 1;
 }
 
-/* Desktop Alert Messages */
-.alert {
-    padding: var(--space-lg) var(--space-xl);
-    border-radius: var(--radius-md);
-    margin-bottom: var(--space-lg);
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-md);
-    font-weight: 500;
-    border: 1px solid transparent;
-    position: relative;
-    overflow: hidden;
-}
-
-.alert::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 4px;
-}
-
-.alert-success {
-    background: var(--success-light);
-    color: var(--success-dark);
-    border-color: var(--success-light);
-}
-
-.alert-success::before {
-    background: var(--success-color);
-}
-
-.alert-warning {
-    background: var(--warning-light);
-    color: var(--warning-dark);
-    border-color: var(--warning-light);
-}
-
-.alert-warning::before {
-    background: var(--warning-color);
-}
-
-.alert-error {
-    background: var(--danger-light);
-    color: var(--danger-dark);
-    border-color: var(--danger-light);
-}
-
-.alert-error::before {
-    background: var(--danger-color);
-}
-
-.alert .icon {
-    font-size: var(--font-size-lg);
-    margin-top: 2px;
-    flex-shrink: 0;
-}
-
-/* Desktop Loading States */
-.loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-2xl);
-    color: var(--text-secondary);
-    font-size: var(--font-size-base);
-    gap: var(--space-md);
-}
-
-.spinner {
-    width: 24px;
-    height: 24px;
-    border: 3px solid var(--border-light);
-    border-top: 3px solid var(--primary-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* Desktop Responsive Adjustments */
-@media (max-width: 1200px) {
-    #app-container {
-        flex-direction: column;
-        padding: var(--space-md);
-        gap: var(--space-md);
-    }
-    
-    #sidebar {
-        width: 100%;
-        height: auto;
-        border-right: none;
-        border-bottom: 1px solid var(--glass-border);
-    }
-    
-    .input-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 900px) {
-    .container {
-        padding: var(--space-lg);
-    }
-    
-    .result-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
 /* Desktop Focus Styles */
-*:focus {
-    outline: none;
+.desktop-focused {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 4px;
 }
 
-.modern-btn:focus-visible,
-input:focus-visible,
-select:focus-visible,
-a:focus-visible {
-    box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.2);
+/* Loading States */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '⏳';
+    margin-left: 8px;
 }
 
 /* Desktop Print Styles */
@@ -1007,61 +735,6 @@ a:focus-visible {
     background: linear-gradient(45deg, var(--primary-dark), var(--secondary-light));
 }
 
-/* Stats Grid for Reports */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: var(--space-lg);
-    margin: var(--space-xl) 0;
-}
-
-.stat-card {
-    background: var(--surface-color);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: var(--space-lg);
-    display: flex;
-    align-items: center;
-    gap: var(--space-md);
-    transition: var(--transition);
-    box-shadow: var(--shadow-sm);
-}
-
-.stat-card:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
-}
-
-.stat-icon {
-    width: 48px;
-    height: 48px;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    border-radius: var(--radius-lg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-light);
-    font-size: var(--font-size-lg);
-}
-
-.stat-content {
-    flex: 1;
-}
-
-.stat-value {
-    font-size: var(--font-size-2xl);
-    font-weight: 700;
-    color: var(--primary-color);
-    line-height: 1;
-    margin-bottom: var(--space-xs);
-}
-
-.stat-label {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
 /* Better total price styling */
 .total-price {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
@@ -1082,4 +755,99 @@ a:focus-visible {
 /* Remove logo from title bar since it's requested to remove it */
 .app-logo {
     display: none;
+}
+
+/* Maliyet Analizi Bölümü */
+#costAnalysis {
+    margin-top: var(--space-xl);
+    border-top: 2px solid var(--primary-light);
+    position: relative;
+    display: none;
+    background: var(--background-secondary);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+#costAnalysis::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border-radius: 1px;
+}
+
+#costAnalysis .results-title {
+    color: var(--primary-color);
+    margin-bottom: var(--space-md);
+    font-size: var(--font-size-lg);
+}
+
+#costAnalysis .modern-table {
+    margin-top: var(--space-sm);
+}
+
+#costAnalysis .modern-table th {
+    background: var(--primary-color);
+    color: var(--text-light);
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    padding: var(--space-md);
+}
+
+#costAnalysis .modern-table td {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+#costAnalysis .modern-table tr:hover {
+    background: rgba(30, 60, 114, 0.05);
+}
+
+/* Buton Düzenleri */
+.button-group {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.button-group .modern-btn {
+    flex: 1;
+    min-width: 160px;
+}
+
+@media (max-width: 768px) {
+    .button-group .modern-btn {
+        flex: 1 1 100%;
+        min-width: auto;
+    }
+    
+    .input-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    #app-container {
+        flex-direction: column;
+        padding: var(--space-sm);
+        gap: var(--space-sm);
+    }
+    
+    #sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .results-actions {
+        flex-direction: column;
+        gap: var(--space-xs);
+    }
+    
+    .results-actions .modern-btn {
+        width: 100%;
+    }
 }

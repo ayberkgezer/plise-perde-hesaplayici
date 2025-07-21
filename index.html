@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="src/styles/style.css">
-    <link rel="stylesheet" href="src/styles/desktop-enhancements.css">
     <style>
         /* Desktop Window Controls */
         .title-bar {
@@ -298,9 +297,14 @@
                             <input type="number" id="quantity" value="1" min="1" class="modern-input">
                         </div>
                     </div>
-                    <button id="calculateBtn" class="primary modern-btn">
-                        <span class="icon icon-plus"></span> Hesapla ve Ekle
-                    </button>
+                    <div class="button-group">
+                        <button id="calculateBtn" class="primary modern-btn">
+                            <span class="icon icon-plus"></span> Hesapla ve Ekle
+                        </button>
+                        <button id="calculateCostBtn" class="success modern-btn">
+                            <span class="icon icon-calculator"></span> Maliyet Hesapla
+                        </button>
+                    </div>
                 </div>
 
                 <div id="results" class="container">
@@ -339,6 +343,44 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Maliyet Analizi Bölümü -->
+                <div id="costAnalysis" class="container">
+                    <div class="results-header">
+                        <h2 class="results-title"><span class="icon icon-calculator"></span> Maliyet Analizi</h2>
+                        <div class="results-actions">
+                            <button id="clearCostBtn" class="danger modern-btn">
+                                <span class="icon icon-trash"></span> Maliyetleri Temizle
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Adet</th>
+                                    <th>Kumaş Maliyeti</th>
+                                    <th>Sabit Gider</th>
+                                    <th>Alüminyum</th>
+                                    <th>Toplam Maliyet</th>
+                                    <th>Kar Marjı</th>
+                                    <th>Kar Oranı</th>
+                                </tr>
+                            </thead>
+                            <tbody id="costTable">
+                                <!-- Maliyet analizi buraya eklenecek -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="summary-section">
+                        <div id="totalCost" class="total-price">
+                            <span class="icon icon-calculator"></span>Toplam Maliyet: 0 TL
+                        </div>
+                        <div id="totalProfit" class="total-price" style="color: #10b981; margin-top: 8px;">
+                            <span class="icon icon-money"></span>Toplam Kar: 0 TL
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div id="database" class="view">
@@ -350,6 +392,7 @@
                                 <tr>
                                     <th><span class="icon icon-palette"></span> Kumaş Adı</th>
                                     <th><span class="icon icon-money"></span> Fiyat (m²)</th>
+                                    <th><span class="icon icon-calculator"></span> Maliyet (m²)</th>
                                     <th><span class="icon icon-settings"></span> İşlemler</th>
                                 </tr>
                             </thead>
@@ -368,7 +411,11 @@
                         </div>
                         <div class="form-group">
                             <label for="fabricPrice"><span class="icon icon-money"></span> Fiyat (m²)</label>
-                            <input type="number" id="fabricPrice" placeholder="Fiyatını girin" class="modern-input">
+                            <input type="number" id="fabricPrice" placeholder="Satış fiyatını girin" class="modern-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="fabricCost"><span class="icon icon-calculator"></span> Maliyet (m²)</label>
+                            <input type="number" id="fabricCost" placeholder="Maliyet fiyatını girin" class="modern-input">
                         </div>
                     </div>
                     <button id="saveFabricBtn" class="primary modern-btn">
@@ -378,6 +425,24 @@
                         <span class="icon icon-times"></span> İptal Et
                     </button>
                     <input type="hidden" id="editIndex" value="-1">
+                </div>
+                
+                <!-- Maliyet Ayarları Bölümü -->
+                <div class="container">
+                    <h2><span class="icon icon-settings"></span> Maliyet Ayarları</h2>
+                    <div class="input-grid">
+                        <div class="form-group">
+                            <label for="fixedCostPerUnit"><span class="icon icon-money"></span> Adet Başı Sabit Gider (TL)</label>
+                            <input type="number" id="fixedCostPerUnit" placeholder="25" class="modern-input" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="aluminiumCostPerCm"><span class="icon icon-calculator"></span> Alüminyum Maliyeti (TL/cm)</label>
+                            <input type="number" id="aluminiumCostPerCm" placeholder="0.8" class="modern-input" step="0.01">
+                        </div>
+                    </div>
+                    <button id="saveCostSettingsBtn" class="success modern-btn">
+                        <span class="icon icon-save"></span> Maliyet Ayarlarını Kaydet
+                    </button>
                 </div>
             </div>
         </div>

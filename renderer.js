@@ -30,9 +30,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const fabricManagementTable = document.getElementById('fabricManagementTable');
     const fabricNameInput = document.getElementById('fabricName');
     const fabricPriceInput = document.getElementById('fabricPrice');
+    const fabricCostInput = document.getElementById('fabricCost');
     const saveFabricBtn = document.getElementById('saveFabricBtn');
     const cancelEditBtn = document.getElementById('cancelEditBtn');
     const editIndexInput = document.getElementById('editIndex');
+
+    // Cost Analysis Elements
+    const costAnalysisDiv = document.getElementById('costAnalysis');
+    const calculateCostBtn = document.getElementById('calculateCostBtn');
+    const clearCostBtn = document.getElementById('clearCostBtn');
+    const costTable = document.getElementById('costTable');
+    const totalCostEl = document.getElementById('totalCost');
+    const totalProfitEl = document.getElementById('totalProfit');
+
+    // Cost Settings Elements
+    const fixedCostPerUnitInput = document.getElementById('fixedCostPerUnit');
+    const aluminiumCostPerCmInput = document.getElementById('aluminiumCostPerCm');
+    const saveCostSettingsBtn = document.getElementById('saveCostSettingsBtn');
 
     // Action Buttons
     const clearAllBtn = document.getElementById('clearAllBtn');
@@ -42,10 +56,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const dataPath = window.electronAPI ? window.electronAPI.resolvePath(__dirname, 'data.json') : './data.json';
     let fabricData = { 
         fabricSeries: [],
+        costSettings: {
+            fixedCostPerUnit: 25,
+            aluminiumCostPerCm: 0.8
+        },
         createdAt: new Date().toISOString(),
         lastModified: new Date().toISOString()
     };
     let calculations = [];
+    let costCalculations = [];
     let calculationCount = 0; // Desktop hesaplama sayacı
 
     // --- Navigation Functions ---
@@ -101,15 +120,38 @@ document.addEventListener('DOMContentLoaded', () => {
                     loadedData.lastModified = new Date().toISOString();
                 }
                 
+                // Migration for cost settings
+                if (!loadedData.costSettings) {
+                    loadedData.costSettings = {
+                        fixedCostPerUnit: 25,
+                        aluminiumCostPerCm: 0.8,
+                        createdAt: new Date().toISOString(),
+                        lastModified: new Date().toISOString()
+                    };
+                }
+                
+                // Migration for fabric cost data
+                loadedData.fabricSeries.forEach(series => {
+                    if (!series.cost) {
+                        series.cost = Math.round(series.price * 0.5); // Default cost as 50% of price
+                    }
+                });
+                
                 fabricData = loadedData;
             } else {
                 // Create initial data structure
                 fabricData = {
                     fabricSeries: [
-                        { name: 'Standart Plise', price: 350, createdAt: new Date().toISOString() },
-                        { name: 'Blackout Plise', price: 450, createdAt: new Date().toISOString() },
-                        { name: 'Premium Plise', price: 650, createdAt: new Date().toISOString() }
+                        { name: 'Standart Plise', price: 350, cost: 180, createdAt: new Date().toISOString() },
+                        { name: 'Blackout Plise', price: 450, cost: 220, createdAt: new Date().toISOString() },
+                        { name: 'Premium Plise', price: 650, cost: 350, createdAt: new Date().toISOString() }
                     ],
+                    costSettings: {
+                        fixedCostPerUnit: 25,
+                        aluminiumCostPerCm: 0.8,
+                        createdAt: new Date().toISOString(),
+                        lastModified: new Date().toISOString()
+                    },
                     createdAt: new Date().toISOString(),
                     lastModified: new Date().toISOString()
                 };
@@ -122,6 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         renderFabricDropdown();
         renderFabricManagementTable();
+        loadCostSettings();
     }
 
     async function saveData() {
@@ -172,6 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
             row.innerHTML = `
                 <td>${series.name}</td>
                 <td>${series.price} TL</td>
+                <td>${series.cost || 0} TL</td>
                 <td>
                     <div class="table-actions">
                         <button class="modern-btn edit-btn" data-index="${index}">
@@ -213,14 +257,144 @@ document.addEventListener('DOMContentLoaded', () => {
         if (totalPriceEl) {
             totalPriceEl.innerHTML = `<span class="icon-money" style="margin-right: 0.5rem;"></span>Toplam Tutar: ${total.toFixed(2)} TL`;
         }
+        
+        // Show/hide results container based on calculations
+        const resultsContainer = document.getElementById('results');
+        if (resultsContainer) {
+            resultsContainer.style.display = calculations.length > 0 ? 'block' : 'none';
+            if (calculations.length > 0) {
+                resultsContainer.classList.add('has-content');
+            } else {
+                resultsContainer.classList.remove('has-content');
+            }
+        }
+        
+        // Don't auto-show cost analysis - only when button is clicked
+        // Cost analysis will be shown only when calculateCostBtn is clicked
     }
 
     function resetFabricForm() {
         if (fabricNameInput) fabricNameInput.value = '';
         if (fabricPriceInput) fabricPriceInput.value = '';
+        if (fabricCostInput) fabricCostInput.value = '';
         if (editIndexInput) editIndexInput.value = '';
         if (saveFabricBtn) saveFabricBtn.innerHTML = '<span class="icon-save"></span> Yeni Kumaş Ekle';
         if (cancelEditBtn) cancelEditBtn.style.display = 'none';
+    }
+
+    // --- Cost Analysis Functions ---
+    function loadCostSettings() {
+        if (!fabricData.costSettings) return;
+        
+        if (fixedCostPerUnitInput) fixedCostPerUnitInput.value = fabricData.costSettings.fixedCostPerUnit || 25;
+        if (aluminiumCostPerCmInput) aluminiumCostPerCmInput.value = fabricData.costSettings.aluminiumCostPerCm || 0.8;
+    }
+
+    function calculateCostAnalysis() {
+        if (calculations.length === 0) {
+            showNotification('Önce hesaplama yapmanız gerekiyor!', 'error');
+            return;
+        }
+
+        costCalculations = [];
+        let totalCost = 0;
+        let totalRevenue = 0;
+
+        calculations.forEach(calc => {
+            // Find fabric cost
+            const fabricSeries = fabricData.fabricSeries.find(series => 
+                calc.fabricName === series.name
+            );
+            
+            if (!fabricSeries) return;
+
+            const fabricCostPerM2 = fabricSeries.cost || 0;
+            const area = parseFloat(calc.area);
+            const quantity = parseInt(calc.quantity);
+            const width = parseFloat(calc.width);
+
+            // Cost calculations
+            const fabricCost = fabricCostPerM2 * area * quantity;
+            const fixedCost = (fabricData.costSettings.fixedCostPerUnit || 25) * quantity;
+            const aluminiumLength = width * 2; // 2x width for aluminum
+            const aluminiumCost = aluminiumLength * (fabricData.costSettings.aluminiumCostPerCm || 0.8) * quantity;
+
+            const totalItemCost = fabricCost + fixedCost + aluminiumCost;
+            const revenue = parseFloat(calc.price);
+            const profit = revenue - totalItemCost;
+            const profitMargin = revenue > 0 ? ((profit / revenue) * 100) : 0;
+
+            const costCalc = {
+                quantity: quantity,
+                fabricCost: fabricCost.toFixed(2),
+                fixedCost: fixedCost.toFixed(2),
+                aluminiumCost: aluminiumCost.toFixed(2),
+                totalCost: totalItemCost.toFixed(2),
+                profit: profit.toFixed(2),
+                profitMargin: profitMargin.toFixed(1)
+            };
+
+            costCalculations.push(costCalc);
+            totalCost += totalItemCost;
+            totalRevenue += revenue;
+        });
+
+        renderCostAnalysis();
+        
+        // Show cost analysis section
+        if (costAnalysisDiv) {
+            costAnalysisDiv.style.display = 'block';
+        }
+        
+        // Update totals
+        const totalProfit = totalRevenue - totalCost;
+        if (totalCostEl) {
+            totalCostEl.innerHTML = `<span class="icon-calculator" style="margin-right: 0.5rem;"></span>Toplam Maliyet: ${totalCost.toFixed(2)} TL`;
+        }
+        if (totalProfitEl) {
+            totalProfitEl.innerHTML = `<span class="icon-money" style="margin-right: 0.5rem;"></span>Toplam Kar: ${totalProfit.toFixed(2)} TL (${totalRevenue > 0 ? ((totalProfit / totalRevenue) * 100).toFixed(1) : 0}%)`;
+        }
+
+        showNotification('Maliyet analizi tamamlandı!', 'success');
+    }
+
+    function renderCostAnalysis() {
+        if (!costTable) return;
+        
+        costTable.innerHTML = '';
+        costCalculations.forEach((cost, index) => {
+            const row = document.createElement('tr');
+            const profitColor = parseFloat(cost.profit) >= 0 ? '#10b981' : '#ef4444';
+            
+            row.innerHTML = `
+                <td>${cost.quantity}</td>
+                <td>${cost.fabricCost} TL</td>
+                <td>${cost.fixedCost} TL</td>
+                <td>${cost.aluminiumCost} TL</td>
+                <td><strong>${cost.totalCost} TL</strong></td>
+                <td style="color: ${profitColor}; font-weight: 600;">${cost.profit} TL</td>
+                <td style="color: ${profitColor}; font-weight: 600;">${cost.profitMargin}%</td>
+            `;
+            costTable.appendChild(row);
+        });
+    }
+
+    function clearCostAnalysis() {
+        costCalculations = [];
+        if (costTable) costTable.innerHTML = '';
+        if (totalCostEl) {
+            totalCostEl.innerHTML = `<span class="icon-calculator" style="margin-right: 0.5rem;"></span>Toplam Maliyet: 0 TL`;
+        }
+        if (totalProfitEl) {
+            totalProfitEl.innerHTML = `<span class="icon-money" style="margin-right: 0.5rem;"></span>Toplam Kar: 0 TL`;
+        }
+        
+        // Hide cost analysis section
+        if (costAnalysisDiv) {
+            costAnalysisDiv.style.display = 'none';
+        }
+        
+        showNotification('Maliyet analizi temizlendi!', 'info');
     }
 
     // --- Notification System ---
@@ -341,6 +515,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (countElement) {
                     countElement.textContent = '0 Hesaplama';
                 }
+                
+                // Also clear and hide cost analysis
+                clearCostAnalysis();
+                
                 renderCalculationResult();
                 showNotification('Tüm hesaplamalar temizlendi.', 'success');
             }
@@ -363,6 +541,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveFabricBtn.addEventListener('click', async () => {
             const name = fabricNameInput?.value.trim();
             const price = parseFloat(fabricPriceInput?.value);
+            const cost = parseFloat(fabricCostInput?.value) || 0;
             const editIndex = editIndexInput?.value;
 
             if (!name || isNaN(price) || price <= 0) {
@@ -384,12 +563,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Update existing fabric
                 fabricData.fabricSeries[editIndex].name = name;
                 fabricData.fabricSeries[editIndex].price = price;
+                fabricData.fabricSeries[editIndex].cost = cost;
                 showNotification('Kumaş başarıyla güncellendi!', 'success');
             } else {
                 // Add new fabric
                 fabricData.fabricSeries.push({
                     name: name,
                     price: price,
+                    cost: cost,
                     createdAt: new Date().toISOString()
                 });
                 showNotification('Yeni kumaş başarıyla eklendi!', 'success');
@@ -427,6 +608,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const fabric = fabricData.fabricSeries[index];
                 if (fabricNameInput) fabricNameInput.value = fabric.name;
                 if (fabricPriceInput) fabricPriceInput.value = fabric.price;
+                if (fabricCostInput) fabricCostInput.value = fabric.cost || 0;
                 if (editIndexInput) editIndexInput.value = index;
                 if (saveFabricBtn) saveFabricBtn.innerHTML = '<span class="icon-save"></span> Kumaşı Güncelle';
                 if (cancelEditBtn) cancelEditBtn.style.display = 'inline-block';
@@ -477,6 +659,41 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         observer.observe(calculatorView, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    // Cost Settings Save Button
+    if (saveCostSettingsBtn) {
+        saveCostSettingsBtn.addEventListener('click', async () => {
+            const fixedCost = parseFloat(fixedCostPerUnitInput?.value) || 25;
+            const aluminiumCost = parseFloat(aluminiumCostPerCmInput?.value) || 0.8;
+
+            fabricData.costSettings = {
+                fixedCostPerUnit: fixedCost,
+                aluminiumCostPerCm: aluminiumCost,
+                lastModified: new Date().toISOString()
+            };
+
+            await saveData();
+            showNotification('Maliyet ayarları başarıyla kaydedildi!', 'success');
+        });
+    }
+
+    // Calculate Cost Button
+    if (calculateCostBtn) {
+        calculateCostBtn.addEventListener('click', () => {
+            if (calculations.length === 0) {
+                showNotification('Önce hesaplama yapmanız gerekiyor!', 'error');
+                return;
+            }
+            calculateCostAnalysis();
+        });
+    }
+
+    // Clear Cost Button
+    if (clearCostBtn) {
+        clearCostBtn.addEventListener('click', () => {
+            clearCostAnalysis();
+        });
     }
 
     // --- Initialize Application ---
