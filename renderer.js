@@ -1,0 +1,485 @@
+// Electron API kullanarak dosya işlemleri
+document.addEventListener('DOMContentLoaded', () => {
+    // Platform Detection - Title bar'ı platform bazında ayarla
+    const titleBar = document.querySelector('.title-bar');
+    const titleBarControls = document.getElementById('title-bar-controls');
+    const isMac = window.electronAPI?.platform === 'darwin' || navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    
+    if (isMac) {
+        titleBar?.classList.add('mac-platform');
+        titleBarControls?.classList.add('mac-platform');
+    } else {
+        titleBar?.classList.add('win-platform');
+        titleBarControls?.classList.add('win-platform');
+    }
+
+    // --- Element Referansları ---
+    const fabricTypeSelect = document.getElementById('fabricType');
+    const calculateBtn = document.getElementById('calculateBtn');
+    const resultTable = document.getElementById('resultTable');
+    const totalPriceEl = document.getElementById('totalPrice');
+    const widthInput = document.getElementById('width');
+    const heightInput = document.getElementById('height');
+    const quantityInput = document.getElementById('quantity');
+
+    // Navigation Elements
+    const navLinks = document.querySelectorAll('.nav-link');
+    const views = document.querySelectorAll('.view');
+
+    // Database Management Elements
+    const fabricManagementTable = document.getElementById('fabricManagementTable');
+    const fabricNameInput = document.getElementById('fabricName');
+    const fabricPriceInput = document.getElementById('fabricPrice');
+    const saveFabricBtn = document.getElementById('saveFabricBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const editIndexInput = document.getElementById('editIndex');
+
+    // Action Buttons
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const printBtn = document.getElementById('printBtn');
+
+    // --- Global Değişkenler ---
+    const dataPath = window.electronAPI ? window.electronAPI.resolvePath(__dirname, 'data.json') : './data.json';
+    let fabricData = { 
+        fabricSeries: [],
+        createdAt: new Date().toISOString(),
+        lastModified: new Date().toISOString()
+    };
+    let calculations = [];
+    let calculationCount = 0; // Desktop hesaplama sayacı
+
+    // --- Navigation Functions ---
+    function initNavigation() {
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetView = link.dataset.view;
+                if (targetView) {
+                    switchView(targetView);
+                    // Update active state
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                }
+            });
+        });
+    }
+
+    function switchView(viewName) {
+        views.forEach(view => view.classList.remove('active'));
+        const targetView = document.getElementById(viewName);
+        if (targetView) {
+            targetView.classList.add('active');
+        }
+        
+        // Switch view successfully
+    }
+
+    // --- Data Functions ---
+    async function loadAndRenderData() {
+        try {
+            let rawData;
+            if (window.electronAPI && window.electronAPI.fileExists(dataPath)) {
+                rawData = window.electronAPI.readFile(dataPath);
+            } else {
+                // Fallback for browser environment or missing file
+                try {
+                    const response = await fetch('./data.json');
+                    rawData = await response.text();
+                } catch (e) {
+                    rawData = null;
+                }
+            }
+            
+            if (rawData) {
+                const loadedData = JSON.parse(rawData);
+                
+                // Migration for older data format
+                if (!loadedData.createdAt) {
+                    loadedData.createdAt = new Date().toISOString();
+                }
+                if (!loadedData.lastModified) {
+                    loadedData.lastModified = new Date().toISOString();
+                }
+                
+                fabricData = loadedData;
+            } else {
+                // Create initial data structure
+                fabricData = {
+                    fabricSeries: [
+                        { name: 'Standart Plise', price: 350, createdAt: new Date().toISOString() },
+                        { name: 'Blackout Plise', price: 450, createdAt: new Date().toISOString() },
+                        { name: 'Premium Plise', price: 650, createdAt: new Date().toISOString() }
+                    ],
+                    createdAt: new Date().toISOString(),
+                    lastModified: new Date().toISOString()
+                };
+                await saveData();
+            }
+        } catch (error) {
+            console.error('Veri yüklenirken veya oluşturulurken hata:', error);
+            showNotification('Hata: data.json dosyası okunamadı veya oluşturulamadı.', 'error');
+            return;
+        }
+        renderFabricDropdown();
+        renderFabricManagementTable();
+    }
+
+    async function saveData() {
+        try {
+            fabricData.lastModified = new Date().toISOString();
+            
+            // Electron API kullanarak dosya yazma
+            if (window.electronAPI) {
+                const success = window.electronAPI.writeFile(dataPath, JSON.stringify(fabricData, null, 2));
+                if (success) {
+                    showNotification('Değişiklikler başarıyla kaydedildi!', 'success');
+                } else {
+                    throw new Error('Dosya yazma başarısız');
+                }
+            } else {
+                // Browser environment - localStorage kullan
+                localStorage.setItem('fabricData', JSON.stringify(fabricData));
+                showNotification('Değişiklikler yerel olarak kaydedildi!', 'success');
+            }
+            
+            renderFabricDropdown();
+            renderFabricManagementTable();
+        } catch (error) {
+            console.error('Veri kaydedilirken hata:', error);
+            showNotification('Hata: Veriler kaydedilemedi.', 'error');
+        }
+    }
+
+    // --- UI Rendering Functions ---
+    function renderFabricDropdown() {
+        if (!fabricTypeSelect) return;
+        
+        fabricTypeSelect.innerHTML = '';
+        fabricData.fabricSeries.forEach(series => {
+            const option = document.createElement('option');
+            option.value = series.price;
+            option.textContent = `${series.name} (${series.price} TL/m²)`;
+            fabricTypeSelect.appendChild(option);
+        });
+    }
+
+    function renderFabricManagementTable() {
+        if (!fabricManagementTable) return;
+        
+        fabricManagementTable.innerHTML = '';
+        fabricData.fabricSeries.forEach((series, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${series.name}</td>
+                <td>${series.price} TL</td>
+                <td>
+                    <div class="table-actions">
+                        <button class="modern-btn edit-btn" data-index="${index}">
+                            <span class="icon-edit"></span> Düzenle
+                        </button>
+                        <button class="modern-btn danger delete-btn" data-index="${index}">
+                            <span class="icon-trash"></span> Sil
+                        </button>
+                    </div>
+                </td>
+            `;
+            fabricManagementTable.appendChild(row);
+        });
+    }
+
+    function renderCalculationResult() {
+        if (!resultTable) return;
+        
+        resultTable.innerHTML = '';
+        calculations.forEach((calc, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${calc.quantity}</td>
+                <td>${calc.width} cm</td>
+                <td>${calc.height} cm</td>
+                <td>${calc.area} m²</td>
+                <td>${calc.fabricName}</td>
+                <td>${calc.price} TL</td>
+                <td>
+                    <button class="modern-btn danger remove-calc-btn" data-index="${index}">
+                        <span class="icon-trash"></span> Sil
+                    </button>
+                </td>
+            `;
+            resultTable.appendChild(row);
+        });
+        
+        const total = calculations.reduce((sum, calc) => sum + parseFloat(calc.price), 0);
+        if (totalPriceEl) {
+            totalPriceEl.innerHTML = `<span class="icon-money" style="margin-right: 0.5rem;"></span>Toplam Tutar: ${total.toFixed(2)} TL`;
+        }
+    }
+
+    function resetFabricForm() {
+        if (fabricNameInput) fabricNameInput.value = '';
+        if (fabricPriceInput) fabricPriceInput.value = '';
+        if (editIndexInput) editIndexInput.value = '';
+        if (saveFabricBtn) saveFabricBtn.innerHTML = '<span class="icon-save"></span> Yeni Kumaş Ekle';
+        if (cancelEditBtn) cancelEditBtn.style.display = 'none';
+    }
+
+    // --- Notification System ---
+    function showNotification(message, type = 'info') {
+        // Create notification element if it doesn't exist
+        let notification = document.querySelector('.notification');
+        if (!notification) {
+            notification = document.createElement('div');
+            notification.className = 'notification';
+            document.body.appendChild(notification);
+        }
+
+        // Set notification content and style
+        notification.textContent = message;
+        notification.className = `notification ${type} show`;
+
+        // Add notification styles if not already added
+        if (!document.querySelector('#notification-styles')) {
+            const styles = document.createElement('style');
+            styles.id = 'notification-styles';
+            styles.textContent = `
+                .notification {
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    color: white;
+                    font-weight: 500;
+                    z-index: 10000;
+                    transform: translateX(100%);
+                    transition: transform 0.3s ease;
+                }
+                .notification.show { transform: translateX(0); }
+                .notification.success { background: #10b981; }
+                .notification.error { background: #ef4444; }
+                .notification.info { background: #3b82f6; }
+            `;
+            document.head.appendChild(styles);
+        }
+
+        // Auto hide after 3 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
+
+    // --- Event Listeners ---
+
+    // Navigation
+    initNavigation();
+
+    // Calculate Button
+    if (calculateBtn) {
+        calculateBtn.addEventListener('click', () => {
+            const width = parseFloat(widthInput?.value);
+            const height = parseFloat(heightInput?.value);
+            const quantity = parseInt(quantityInput?.value, 10) || 1;
+            const selectedFabricPrice = parseFloat(fabricTypeSelect?.value);
+            const selectedFabricName = fabricTypeSelect?.options[fabricTypeSelect.selectedIndex]?.text.split(' (')[0];
+
+            if (isNaN(width) || isNaN(height) || isNaN(quantity) || width <= 0 || height <= 0 || quantity <= 0) {
+                showNotification('Lütfen geçerli değerler girin!', 'error');
+                return;
+            }
+
+            if (isNaN(selectedFabricPrice)) {
+                showNotification('Lütfen kumaş türü seçin!', 'error');
+                return;
+            }
+
+            const area = (width / 100) * (height / 100);
+            const effectiveArea = Math.max(area, 1); // Minimum 1 m² kuralı
+            const singlePrice = effectiveArea * selectedFabricPrice;
+            const totalPriceForLine = singlePrice * quantity;
+
+            const newCalc = {
+                quantity: quantity,
+                width: width,
+                height: height,
+                area: effectiveArea.toFixed(2),
+                fabricName: selectedFabricName,
+                price: totalPriceForLine.toFixed(2),
+                createdAt: new Date().toISOString()
+            };
+            calculations.push(newCalc);
+
+            // Desktop integration
+            calculationCount++;
+            const countElement = document.getElementById('calculation-count');
+            if (countElement) {
+                countElement.textContent = `${calculationCount} Hesaplama`;
+            }
+
+            renderCalculationResult();
+            showNotification('Hesaplama başarıyla eklendi!', 'success');
+
+            // Clear form
+            if (widthInput) widthInput.value = '';
+            if (heightInput) heightInput.value = '';
+            if (quantityInput) quantityInput.value = '1';
+            if (widthInput) widthInput.focus();
+        });
+    }
+
+    // Clear All Calculations
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener('click', () => {
+            if (calculations.length === 0) {
+                showNotification('Temizlenecek hesaplama yok.', 'info');
+                return;
+            }
+            
+            if (confirm('Tüm hesaplamaları silmek istediğinizden emin misiniz?')) {
+                calculations = [];
+                calculationCount = 0;
+                const countElement = document.getElementById('calculation-count');
+                if (countElement) {
+                    countElement.textContent = '0 Hesaplama';
+                }
+                renderCalculationResult();
+                showNotification('Tüm hesaplamalar temizlendi.', 'success');
+            }
+        });
+    }
+
+    // Print Button
+    if (printBtn) {
+        printBtn.addEventListener('click', () => {
+            if (calculations.length === 0) {
+                showNotification('Yazdırılacak hesaplama yok.', 'info');
+                return;
+            }
+            window.print();
+        });
+    }
+
+    // Save Fabric Button
+    if (saveFabricBtn) {
+        saveFabricBtn.addEventListener('click', async () => {
+            const name = fabricNameInput?.value.trim();
+            const price = parseFloat(fabricPriceInput?.value);
+            const editIndex = editIndexInput?.value;
+
+            if (!name || isNaN(price) || price <= 0) {
+                showNotification('Lütfen geçerli kumaş adı ve fiyatı girin!', 'error');
+                return;
+            }
+
+            // Check for duplicate names
+            const existingIndex = fabricData.fabricSeries.findIndex(series => 
+                series.name.toLowerCase() === name.toLowerCase() && editIndex !== String(fabricData.fabricSeries.indexOf(series))
+            );
+            
+            if (existingIndex !== -1) {
+                showNotification('Bu isimde bir kumaş zaten mevcut!', 'error');
+                return;
+            }
+
+            if (editIndex !== '' && editIndex >= 0) {
+                // Update existing fabric
+                fabricData.fabricSeries[editIndex].name = name;
+                fabricData.fabricSeries[editIndex].price = price;
+                showNotification('Kumaş başarıyla güncellendi!', 'success');
+            } else {
+                // Add new fabric
+                fabricData.fabricSeries.push({
+                    name: name,
+                    price: price,
+                    createdAt: new Date().toISOString()
+                });
+                showNotification('Yeni kumaş başarıyla eklendi!', 'success');
+            }
+
+            await saveData();
+            resetFabricForm();
+        });
+    }
+
+    // Cancel Edit Button
+    if (cancelEditBtn) {
+        cancelEditBtn.addEventListener('click', () => {
+            resetFabricForm();
+            showNotification('Düzenleme iptal edildi.', 'info');
+        });
+    }
+
+    // Fabric Management Table Events
+    if (fabricManagementTable) {
+        fabricManagementTable.addEventListener('click', async (e) => {
+            const button = e.target.closest('button');
+            if (!button) return;
+            
+            const index = button.dataset.index;
+            if (index === undefined) return;
+
+            if (button.classList.contains('delete-btn')) {
+                if (confirm('Bu kumaşı silmek istediğinizden emin misiniz?')) {
+                    fabricData.fabricSeries.splice(index, 1);
+                    await saveData();
+                    showNotification('Kumaş başarıyla silindi!', 'success');
+                }
+            } else if (button.classList.contains('edit-btn')) {
+                const fabric = fabricData.fabricSeries[index];
+                if (fabricNameInput) fabricNameInput.value = fabric.name;
+                if (fabricPriceInput) fabricPriceInput.value = fabric.price;
+                if (editIndexInput) editIndexInput.value = index;
+                if (saveFabricBtn) saveFabricBtn.innerHTML = '<span class="icon-save"></span> Kumaşı Güncelle';
+                if (cancelEditBtn) cancelEditBtn.style.display = 'inline-block';
+                showNotification('Kumaş düzenleme moduna alındı.', 'info');
+            }
+        });
+    }
+
+    // Result Table Events (Remove individual calculations)
+    if (resultTable) {
+        resultTable.addEventListener('click', (e) => {
+            if (e.target.closest('.remove-calc-btn')) {
+                const index = e.target.closest('.remove-calc-btn').dataset.index;
+                calculations.splice(index, 1);
+                calculationCount = calculations.length;
+                const countElement = document.getElementById('calculation-count');
+                if (countElement) {
+                    countElement.textContent = `${calculationCount} Hesaplama`;
+                }
+                renderCalculationResult();
+                showNotification('Hesaplama silindi.', 'success');
+            }
+        });
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        // Enter key on width/height inputs
+        if (e.key === 'Enter' && (e.target === widthInput || e.target === heightInput)) {
+            if (calculateBtn) calculateBtn.click();
+        }
+        
+        // Escape key to clear form
+        if (e.key === 'Escape') {
+            if (widthInput) widthInput.value = '';
+            if (heightInput) heightInput.value = '';
+            if (quantityInput) quantityInput.value = '1';
+            resetFabricForm();
+        }
+    });
+
+    // Auto-focus on width input when calculator view is active
+    const calculatorView = document.getElementById('calculator');
+    if (calculatorView) {
+        const observer = new MutationObserver(() => {
+            if (calculatorView.classList.contains('active') && widthInput) {
+                setTimeout(() => widthInput.focus(), 100);
+            }
+        });
+        observer.observe(calculatorView, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    // --- Initialize Application ---
+    loadAndRenderData();
+    switchView('calculator');
+});

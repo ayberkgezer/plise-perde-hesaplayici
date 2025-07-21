@@ -1,0 +1,68 @@
+{
+  "name": "plise-perde-hesaplayici",
+  "version": "2.0.0",
+  "description": "Profesyonel Plise Perde Hesaplama ve Analiz Sistemi - Tengra Works tarafından geliştirildi",
+  "main": "main.js",
+  "author": "Tengra Works",
+  "license": "MIT",
+  "homepage": "https://tengraworks.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tengra-works/plise-perde-hesaplayici.git"
+  },
+  "scripts": {
+    "start": "electron .",
+    "dev": "NODE_ENV=development electron .",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "dist": "electron-builder --publish=never",
+    "pack": "electron-builder --dir",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "plise",
+    "perde",
+    "hesaplayıcı",
+    "desktop",
+    "electron",
+    "tengra-works"
+  ],
+  "build": {
+    "appId": "com.tengraworks.plise-perde-hesaplayici",
+    "productName": "Plise Perde Hesaplayıcı",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "renderer.js",
+      "data.json",
+      "src/**/*",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.business",
+      "target": "dmg",
+      "icon": "src/assets/images/icon.png"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "src/assets/images/icon.ico"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Office"
+    }
+  },
+  "type": "commonjs",
+  "devDependencies": {
+    "electron": "^37.2.3",
+    "electron-builder": "^24.13.3"
+  }
+}
