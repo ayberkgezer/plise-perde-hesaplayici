@@ -1,6 +1,12 @@
 const { app, BrowserWindow, Menu, shell, ipcMain } = require('electron');
 const path = require('path');
 
+// Uygulama adını ayarla (dock için)
+app.setName('Perde Hesaplama');
+
+// Process title'ını da ayarla
+process.title = 'Perde Hesaplama';
+
 // Global değişkenler
 let mainWindow;
 let splashWindow;
@@ -14,6 +20,8 @@ function createSplashWindow() {
     transparent: true,
     resizable: false,
     center: true,
+    title: 'Perde Hesaplama',
+    icon: path.join(__dirname, 'src/assets/images/icon.png'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -36,6 +44,7 @@ function createMainWindow() {
     minWidth: 1200,
     minHeight: 800,
     show: false,
+    title: 'Perde Hesaplama',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -184,6 +193,13 @@ function createMenu() {
 
 // App event handlers
 app.whenReady().then(() => {
+  // macOS dock icon ve badge ayarları
+  if (process.platform === 'darwin') {
+    app.dock.setIcon(path.join(__dirname, 'src/assets/images/icon.png'));
+    // Dock'ta uygulama adını zorla
+    app.setName('Perde Hesaplama');
+  }
+  
   createSplashWindow();
 
   app.on('activate', function () {
@@ -224,9 +240,9 @@ ipcMain.handle('window-close', () => {
 
 // Uygulama bilgileri
 app.setAboutPanelOptions({
-  applicationName: 'Plise Perde Hesaplayıcı',
+  applicationName: 'Perde Hesaplama',
   applicationVersion: '2.0.0',
   version: '2.0.0',
   copyright: '© 2025 Tengra Works - tengraworks.com',
-  credits: 'Profesyonel plise perde hesaplama sistemi'
+  credits: 'Profesyonel perde hesaplama sistemi'
 });

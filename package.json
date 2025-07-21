@@ -1,14 +1,14 @@
 {
-  "name": "plise-perde-hesaplayici",
+  "name": "perde-hesaplama",
   "version": "2.0.0",
-  "description": "Profesyonel Plise Perde Hesaplama ve Analiz Sistemi - Tengra Works tarafından geliştirildi",
+  "description": "Profesyonel Perde Hesaplama ve Analiz Sistemi - Tengra Works tarafından geliştirildi",
   "main": "main.js",
   "author": "Tengra Works",
   "license": "MIT",
   "homepage": "https://tengraworks.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tengra-works/plise-perde-hesaplayici.git"
+    "url": "https://github.com/tengra-works/perde-hesaplama.git"
   },
   "scripts": {
     "start": "electron .",
@@ -22,7 +22,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "plise",
     "perde",
     "hesaplayıcı",
     "desktop",
@@ -30,8 +29,8 @@
     "tengra-works"
   ],
   "build": {
-    "appId": "com.tengraworks.plise-perde-hesaplayici",
-    "productName": "Plise Perde Hesaplayıcı",
+    "appId": "com.tengraworks.perde-hesaplama",
+    "productName": "Perde Hesaplama",
     "directories": {
       "output": "dist",
       "buildResources": "build"
@@ -49,7 +48,13 @@
     "mac": {
       "category": "public.app-category.business",
       "target": "dmg",
-      "icon": "src/assets/images/icon.png"
+      "icon": "src/assets/images/icon.icns",
+      "bundleShortVersion": "2.0.0",
+      "bundleVersion": "2.0.0",
+      "extendInfo": {
+        "CFBundleDisplayName": "Perde Hesaplama",
+        "CFBundleName": "Perde Hesaplama"
+      }
     },
     "win": {
       "target": "nsis",
