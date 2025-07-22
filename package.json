@@ -21,7 +21,6 @@
     "pack": "electron-builder --dir",
     "migrate": "node migrate-data.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "electron-builder install-app-deps",
     "release": "electron-builder --publish=always"
   },
   "keywords": [
