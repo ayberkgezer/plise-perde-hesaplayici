@@ -171,7 +171,9 @@ function createMenu() {
         {
           label: 'Hakkında',
           click: () => {
-            shell.openExternal('https://tengraworks.com');
+            if (mainWindow) {
+              mainWindow.webContents.send('show-about');
+            }
           }
         },
         {

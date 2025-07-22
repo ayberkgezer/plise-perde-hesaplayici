@@ -311,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const fabricCostPerM2 = fabricSeries.cost || 0;
             const area = parseFloat(calc.area);
-            const quantity = parseInt(calc.quantity);
+            const quantity = parseInt(calc.quantity, 10) || 1;
             const width = parseFloat(calc.width);
 
             // Cost calculations
@@ -704,7 +704,100 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Initialize Application ---
+    // --- About Page Functions ---
+    function showAboutPage() {
+        const aboutHtmlPath = 'src/views/about.html';
+        try {
+            const aboutHtml = fs.readFileSync(aboutHtmlPath, 'utf8');
+            appContainer.innerHTML = aboutHtml;
+            switchView('about');
+
+            // Move the logo out of the hero and into the container for better positioning
+            const container = document.querySelector('.about-container');
+            const logo = document.querySelector('.about-hero-logo');
+            if (container && logo) {
+                container.prepend(logo);
+            }
+
+        } catch (error) {
+            console.error('Error loading about page:', error);
+            showNotification('Hakkında sayfası yüklenemedi.', 'error');
+        }
+    }
+
+    // Web sitesi açma fonksiyonu
+    window.openWebsite = function(url) {
+        if (window.electronAPI && window.electronAPI.openExternal) {
+            // Electron ortamında güvenli shell.openExternal kullan
+            window.electronAPI.openExternal(url);
+        } else {
+            // Web ortamında normal window.open kullan
+            window.open(url, '_blank');
+        }
+        showNotification('Web sitesi açılıyor...', 'info');
+    };
+
+    // E-posta gönderme fonksiyonu
+    window.sendEmail = function(email) {
+        const subject = encodeURIComponent('Plise Perde Hesaplayıcı Hakkında');
+        const body = encodeURIComponent('Merhaba Tengra Works ekibi,\n\nPlise Perde Hesaplayıcı uygulaması hakkında bilgi almak istiyorum.\n\nTeşekkürler.');
+        const mailtoUrl = `mailto:${email}?subject=${subject}&body=${body}`;
+        
+        if (window.electronAPI && window.electronAPI.openExternal) {
+            // Electron ortamında güvenli shell.openExternal kullan
+            window.electronAPI.openExternal(mailtoUrl);
+        } else {
+            // Web ortamında normal window.location kullan
+            window.location.href = mailtoUrl;
+        }
+        
+        showNotification('E-posta uygulamanız açılıyor...', 'info');
+    };
+
+        // --- Initialize Application ---
     loadAndRenderData();
     switchView('calculator');
+
+    // About Page Functions - Global olarak tanımlanıyor
+    window.openWebsite = function(url) {
+        if (window.electronAPI && window.electronAPI.openExternal) {
+            window.electronAPI.openExternal(url);
+        } else {
+            window.open(url, '_blank');
+        }
+        showNotification('Web tarayıcınızda açılıyor...', 'info');
+    };
+
+    window.sendEmail = function(email) {
+        const subject = 'Plise Perde Hesaplayıcı - Destek Talebi';
+        const body = 'Merhaba,\\n\\nPlise Perde Hesaplayıcı programı hakkında yardıma ihtiyacım var.\\n\\nSorum/Talebim:\\n\\n\\nTeşekkürler.';
+        const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        
+        if (window.electronAPI && window.electronAPI.openExternal) {
+            window.electronAPI.openExternal(mailtoUrl);
+        } else {
+            window.location.href = mailtoUrl;
+        }
+        
+        showNotification('E-posta uygulamanız açılıyor...', 'info');
+    };
+
+    // Menu Event Listeners (Electron)
+    if (window.electronAPI && window.electronAPI.onMenuAction) {
+        window.electronAPI.onMenuAction((action) => {
+            if (action === 'show-about') {
+                showAboutPage();
+            } else if (action === 'show-help') {
+                // Switch to about page instead of showing help notification
+                switchView('about');
+                // Update navigation
+                const aboutLink = document.querySelector('[data-view="about"]');
+                const navLinks = document.querySelectorAll('.nav-link');
+                if (aboutLink) {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    aboutLink.classList.add('active');
+                }
+            }
+        });
+    }
 });

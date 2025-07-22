@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, shell } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
@@ -49,8 +49,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
   joinPath: (...pathSegments) => path.join(...pathSegments),
   getDirname: () => __dirname,
   
+  // Shell operations for about page
+  openExternal: (url) => shell.openExternal(url),
+  
   // Menu events
   onNewCalculation: (callback) => ipcRenderer.on('new-calculation', callback),
   onExportData: (callback) => ipcRenderer.on('export-data', callback),
-  onShowHelp: (callback) => ipcRenderer.on('show-help', callback)
+  onShowHelp: (callback) => ipcRenderer.on('show-help', callback),
+  onMenuAction: (callback) => {
+    ipcRenderer.on('show-about', () => callback('show-about'));
+    ipcRenderer.on('show-help', () => callback('show-help'));
+    ipcRenderer.on('new-calculation', () => callback('new-calculation'));
+    ipcRenderer.on('export-data', () => callback('export-data'));
+  }
 });

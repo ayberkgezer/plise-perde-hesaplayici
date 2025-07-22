@@ -9,6 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="src/styles/style.css">
     <link rel="stylesheet" href="src/styles/cost-analysis.css">
+    <link rel="stylesheet" href="src/styles/about-modal.css">
+    <link rel="stylesheet" href="src/styles/about-page.css">
     <style>
         /* Desktop Window Controls */
         .title-bar {
@@ -265,6 +267,15 @@
                             </div>
                         </a>
                     </li>
+                    <li>
+                        <a href="#about" class="nav-link" data-view="about">
+                            <span class="icon icon-info"></span>
+                            <div class="nav-content">
+                                <span class="nav-title">Hakkında</span>
+                                <span class="nav-desc">İletişim ve yardım</span>
+                            </div>
+                        </a>
+                    </li>
                 </ul>
             </nav>
             <div class="sidebar-footer">
@@ -460,6 +471,142 @@
                     </button>
                 </div>
             </div>
+
+            <!-- About / Hakkında Sayfası -->
+            <div id="about" class="view">
+                <!-- Hero Section -->
+                <div class="about-hero">
+                    <div class="about-hero-content">
+                        <img src="src/assets/images/tengraworks.png" alt="Tengra Works Logo" class="about-hero-logo" onerror="this.src='src/assets/images/icon.png'">
+                        <h2>Tengra Works</h2>
+                        <div class="about-version-badge">Plise Perde Hesaplayıcı v2.0.0</div>
+                        <p class="about-description">
+                            Profesyonel plise perde hesaplamaları ve maliyet analizleri için geliştirilmiş 
+                            modern masaüstü uygulaması. İşinizi kolaylaştıran güçlü araçlar.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Main Content Grid -->
+                <div class="about-grid">
+                    <!-- Features Card -->
+                    <div class="about-card">
+                        <h3>
+                            <span class="icon">🚀</span>
+                            Program Özellikleri
+                        </h3>
+                        <div class="about-features-grid">
+                            <div class="feature-item">
+                                <span class="feature-icon">✅</span>
+                                <span class="feature-text">Hızlı ve doğru perde hesaplamaları</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✅</span>
+                                <span class="feature-text">Kumaş veritabanı yönetimi</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✅</span>
+                                <span class="feature-text">Detaylı maliyet analizi</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✅</span>
+                                <span class="feature-text">Kar-zarar hesaplamaları</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✅</span>
+                                <span class="feature-text">Modern kullanıcı arayüzü</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✅</span>
+                                <span class="feature-text">Cross-platform desteği</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Usage Guide Card -->
+                    <div class="about-card">
+                        <h3>
+                            <span class="icon">📚</span>
+                            Kullanım Rehberi
+                        </h3>
+                        <div class="help-steps">
+                            <div class="help-step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h4>Kumaş Seçimi</h4>
+                                    <p>Hesaplayıcı sekmesinden istediğiniz kumaş türünü seçin.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="help-step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h4>Ölçü Girişi</h4>
+                                    <p>En ve boy ölçülerini cm cinsinden girin.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="help-step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h4>Hesaplama</h4>
+                                    <p>"Hesapla" butonuna tıklayın ve sonuçları görün.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="help-step">
+                                <div class="step-number">4</div>
+                                <div class="step-content">
+                                    <h4>Maliyet Analizi</h4>
+                                    <p>"Maliyet Analizi Yap" butonuyla kar-zarar hesaplayın.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Section -->
+                <div class="about-container">
+                    <h3>
+                        <span class="icon">📞</span>
+                        İletişim ve Destek
+                    </h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; text-align: center;">
+                        Herhangi bir sorunuz, öneriniz veya teknik destek ihtiyacınız olduğunda bizimle iletişime geçin.
+                    </p>
+                    
+                    <div class="contact-grid">
+                        <div class="contact-card" onclick="openWebsite('https://tengraworks.com')">
+                            <div class="contact-card-icon">🌐</div>
+                            <h4>Web Sitemiz</h4>
+                            <p>Daha fazla bilgi ve güncellemeler için</p>
+                            <button class="contact-btn">Ziyaret Et</button>
+                        </div>
+                        
+                        <div class="contact-card" onclick="sendEmail('info@tengraworks.com')">
+                            <div class="contact-card-icon">📧</div>
+                            <h4>E-posta Desteği</h4>
+                            <p>info@tengraworks.com</p>
+                            <button class="contact-btn">E-posta Gönder</button>
+                        </div>
+                        
+                        <div class="contact-card" onclick="sendEmail('support@tengraworks.com')">
+                            <div class="contact-card-icon">🛠️</div>
+                            <h4>Teknik Destek</h4>
+                            <p>Pazartesi - Cuma, 09:00 - 18:00</p>
+                            <button class="contact-btn">Destek Al</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Copyright Section -->
+                <div class="copyright-section">
+                    <div class="copyright-content">
+                        <p><strong>© 2025 Tengra Works</strong> - Tüm hakları saklıdır.</p>
+                        <p class="build-info">Build: 2025.01.22 | Plise Perde Hesaplayıcı v2.0.0</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -470,6 +617,85 @@
         </div>
         <div class="status-right">
             <span id="calculation-count">0 Hesaplama</span>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div id="aboutModal" class="about-modal">
+        <div class="about-content">
+            <button class="about-close" onclick="closeAboutModal()">×</button>
+            
+            <div class="about-header">
+                <img src="src/assets/images/tengraworks.png" alt="Tengra Works" class="about-logo" onerror="this.src='src/assets/images/icon.png'">
+                <h2 class="about-title">Tengra Works</h2>
+                <div class="about-version">v2.0.0</div>
+            </div>
+
+            <div class="support-note">
+                <strong>Müşteri Destek & İletişim</strong>
+                Herhangi bir sorunuz, öneriniz veya teknik destek ihtiyacınız olduğunda bizimle iletişime geçebilirsiniz.
+            </div>
+
+            <div class="about-section">
+                <h3>📞 İletişim Bilgileri</h3>
+                <div class="contact-info">
+                    <a href="https://tengraworks.com" class="contact-item" onclick="openExternal('https://tengraworks.com')">
+                        <div class="contact-icon">🌐</div>
+                        <div class="contact-details">
+                            <div class="contact-label">Web Sitesi</div>
+                            <div class="contact-value">tengraworks.com</div>
+                        </div>
+                    </a>
+                    
+                    <a href="mailto:info@tengraworks.com" class="contact-item" onclick="openExternal('mailto:info@tengraworks.com')">
+                        <div class="contact-icon">✉️</div>
+                        <div class="contact-details">
+                            <div class="contact-label">E-posta</div>
+                            <div class="contact-value">info@tengraworks.com</div>
+                        </div>
+                    </a>
+                    
+                    <div class="contact-item" onclick="copyToClipboard('+90 xxx xxx xxxx', 'Telefon numarası kopyalandı!')">
+                        <div class="contact-icon">📱</div>
+                        <div class="contact-details">
+                            <div class="contact-label">Telefon</div>
+                            <div class="contact-value">+90 xxx xxx xxxx</div>
+                        </div>
+                    </div>
+                    
+                    <a href="https://wa.me/90xxxxxxxxx" class="contact-item" onclick="openExternal('https://wa.me/90xxxxxxxxx')">
+                        <div class="contact-icon">💬</div>
+                        <div class="contact-details">
+                            <div class="contact-label">WhatsApp</div>
+                            <div class="contact-value">Hızlı destek için tıklayın</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="about-section">
+                <h3>🚀 Program Hakkında</h3>
+                <p><strong>Plise Perde Hesaplayıcı</strong> - Tengra Works tarafından geliştirilmiş profesyonel plise perde hesaplama ve analiz sistemidir.</p>
+                <ul class="features-list">
+                    <li>Otomatik perde ölçü hesaplamaları</li>
+                    <li>Detaylı maliyet analizi sistemi</li>
+                    <li>Kumaş veritabanı yönetimi</li>
+                    <li>Modern ve kullanıcı dostu arayüz</li>
+                    <li>Veri saklama ve yedekleme</li>
+                    <li>Yazdırma ve dışa aktarma özellikleri</li>
+                </ul>
+            </div>
+
+            <div class="about-section">
+                <h3>🛠️ Teknik Destek</h3>
+                <p>Program kullanımında herhangi bir sorun yaşarsanız veya özellik talebiniz varsa, yukarıdaki iletişim kanallarından bize ulaşabilirsiniz.</p>
+                <p><strong>Destek Saatleri:</strong> Pazartesi - Cuma, 09:00 - 18:00</p>
+            </div>
+
+            <div class="copyright">
+                <p>© 2025 Tengra Works. Tüm hakları saklıdır.</p>
+                <p>Güçlü ve güvenilir çözümler için tercih edin.</p>
+            </div>
         </div>
     </div>
 

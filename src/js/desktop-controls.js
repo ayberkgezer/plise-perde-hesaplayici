@@ -167,11 +167,69 @@ function printCalculation() {
 }
 
 function showAbout() {
-    showDesktopNotification(
-        'Tengra Works - Plise Perde Hesaplayıcı',
-        'Versiyon 2.0.0\nModern masaüstü hesaplama uygulaması\n\nGeliştirici: Tengra Works\nWeb: tengraworks.com\n© 2025 Tüm hakları saklıdır.',
-        'info'
-    );
+    const modal = document.getElementById('aboutModal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+// About Modal Functions
+function closeAboutModal() {
+    const modal = document.getElementById('aboutModal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+function openExternal(url) {
+    if (window.electronAPI && window.electronAPI.openExternal) {
+        window.electronAPI.openExternal(url);
+    } else {
+        window.open(url, '_blank');
+    }
+}
+
+function copyToClipboard(text, message = 'Kopyalandı!') {
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+            if (window.showNotification) {
+                window.showNotification(message, 'success');
+            } else {
+                showDesktopNotification('Kopyalandı', message, 'success');
+            }
+        }).catch(err => {
+            fallbackCopyTextToClipboard(text, message);
+        });
+    } else {
+        fallbackCopyTextToClipboard(text, message);
+    }
+}
+
+function fallbackCopyTextToClipboard(text, message) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.position = "fixed";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        document.execCommand('copy');
+        if (window.showNotification) {
+            window.showNotification(message, 'success');
+        } else {
+            showDesktopNotification('Kopyalandı', message, 'success');
+        }
+    } catch (err) {
+        console.error('Kopyalama başarısız:', err);
+        showDesktopNotification('Hata', 'Kopyalama başarısız', 'error');
+    }
+    
+    document.body.removeChild(textArea);
 }
 
 // Keyboard Shortcuts
@@ -195,6 +253,9 @@ document.addEventListener('keydown', (e) => {
                 closeWindow();
                 break;
         }
+    } else if (e.key === 'F1') {
+        e.preventDefault();
+        showAbout();
     }
 });
 
@@ -262,6 +323,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Application ready - no notification needed
+});
+
+// About Modal Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+    // Close modal on ESC key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('aboutModal');
+            if (modal && modal.classList.contains('active')) {
+                closeAboutModal();
+            }
+        }
+    });
+
+    // Close modal when clicking outside
+    document.addEventListener('click', (e) => {
+        const modal = document.getElementById('aboutModal');
+        if (modal && modal.classList.contains('active')) {
+            if (e.target === modal) {
+                closeAboutModal();
+            }
+        }
+    });
 });
 
 module.exports = {
