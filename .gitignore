@@ -147,3 +147,6 @@ crash-reports/
 # Application specific
 user-data/
 userData/
+
+.opencode
+OpenCode.md
