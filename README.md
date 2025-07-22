@@ -77,12 +77,14 @@ plise-perde-hesaplayici/
 ├── preload.js           # Preload script
 ├── renderer.js          # Renderer süreci
 ├── index.html           # Ana HTML dosyası
-├── data.json           # Uygulama verisi
+├── database.sqlite     # SQLite veritabanı
 ├── package.json        # Proje yapılandırması
+├── migrate-data.js     # Veri migration scripti
 └── src/
     ├── assets/         # Görsel dosyalar
     │   └── images/     # İkonlar ve görseller
     ├── js/             # JavaScript dosyaları
+    │   └── database.js # Veritabanı yönetimi
     ├── styles/         # CSS stilleri
     └── views/          # HTML görünümleri
 ```
@@ -95,9 +97,19 @@ plise-perde-hesaplayici/
 4. **Kaydetme**: Hesaplamalarınızı kaydedin
 5. **Analiz**: Detaylı maliyet analizlerini inceleyin
 
-## 🔧 Yapılandırma
+## 🔧 Veri Yönetimi
 
-Uygulama ayarları ve veriler `data.json` dosyasında saklanır. Bu dosyayı düzenleyerek varsayılan değerleri değiştirebilirsiniz.
+Uygulama verileri SQLite veritabanında (`database.sqlite`) saklanır. Bu, daha güvenilir ve performanslı veri yönetimi sağlar.
+
+### Migration
+
+Eğer eski `data.json` formatından geçiş yapıyorsanız:
+
+```bash
+node migrate-data.js
+```
+
+Bu komut mevcut JSON verilerini SQLite veritabanına aktaracak ve JSON dosyasının yedeğini oluşturacaktır.
 
 ## 📸 Ekran Görüntüleri
 

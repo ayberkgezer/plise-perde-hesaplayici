@@ -1,15 +1,11 @@
-const { app, BrowserWindow, Menu, shell, ipcMain } = require('electron');
+const { app, BrowserWindow, Menu, shell, ipcMain, dialog } = require('electron');
 const path = require('path');
-
-// Uygulama adını ayarla (dock için)
-app.setName('Perde Hesaplama');
-
-// Process title'ını da ayarla
-process.title = 'Perde Hesaplama';
+const DatabaseManager = require('./src/js/database');
 
 // Global değişkenler
 let mainWindow;
 let splashWindow;
+let database;
 
 function createSplashWindow() {
   splashWindow = new BrowserWindow({
@@ -49,6 +45,7 @@ function createMainWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       enableRemoteModule: false,
+      sandbox: false,
       preload: path.join(__dirname, 'preload.js')
     }
   };
@@ -72,6 +69,11 @@ function createMainWindow() {
 
   // Ana sayfa yükle
   mainWindow.loadFile('index.html');
+
+  // Debug için developer tools'u aç (geliştirme aşamasında)
+  if (process.env.NODE_ENV === 'development') {
+    mainWindow.webContents.openDevTools();
+  }
 
   // Pencere hazır olduğunda göster
   mainWindow.once('ready-to-show', () => {
@@ -194,7 +196,36 @@ function createMenu() {
 }
 
 // App event handlers
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // Uygulama adını ayarla (dock için)
+  app.setName('Perde Hesaplama');
+  
+  // Process title'ını da ayarla
+  process.title = 'Perde Hesaplama';
+
+  // Veritabanını başlat
+  database = new DatabaseManager();
+  try {
+    await database.connect();
+    console.log('Veritabanı başarıyla başlatıldı.');
+  } catch (error) {
+    console.error('Veritabanı başlatma hatası:', error);
+    // Kritik hata: Uygulama devam edebilir mi?
+    const response = dialog.showMessageBoxSync(null, {
+      type: 'error',
+      title: 'Veritabanı Hatası',
+      message: 'Veritabanı başlatılamadı!',
+      detail: error.message,
+      buttons: ['Devam Et', 'Çıkış'],
+      defaultId: 1
+    });
+    
+    if (response === 1) {
+      app.quit();
+      return;
+    }
+  }
+
   // macOS dock icon ve badge ayarları
   if (process.platform === 'darwin') {
     app.dock.setIcon(path.join(__dirname, 'src/assets/images/icon.png'));
@@ -213,7 +244,22 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') {
-    app.quit();
+    // Veritabanını kapat
+    if (database) {
+      database.close().then(() => {
+        app.quit();
+      }).catch(() => {
+        app.quit();
+      });
+    } else {
+      app.quit();
+    }
+  }
+});
+
+app.on('before-quit', async () => {
+  if (database) {
+    await database.close();
   }
 });
 
@@ -237,6 +283,113 @@ ipcMain.handle('window-maximize', () => {
 ipcMain.handle('window-close', () => {
   if (mainWindow) {
     mainWindow.close();
+  }
+});
+
+// IPC Handlers - Database Operations
+ipcMain.handle('db-get-fabric-series', async () => {
+  try {
+    return await database.getFabricSeries();
+  } catch (error) {
+    console.error('Kumaş serileri getirme hatası:', error);
+    return [];
+  }
+});
+
+ipcMain.handle('db-add-fabric-series', async (event, name, price, cost) => {
+  try {
+    return await database.addFabricSeries(name, price, cost);
+  } catch (error) {
+    console.error('Kumaş serisi ekleme hatası:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('db-update-fabric-series', async (event, id, name, price, cost) => {
+  try {
+    return await database.updateFabricSeries(id, name, price, cost);
+  } catch (error) {
+    console.error('Kumaş serisi güncelleme hatası:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('db-delete-fabric-series', async (event, id) => {
+  try {
+    return await database.deleteFabricSeries(id);
+  } catch (error) {
+    console.error('Kumaş serisi silme hatası:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('db-get-cost-settings', async () => {
+  try {
+    return await database.getCostSettings();
+  } catch (error) {
+    console.error('Maliyet ayarları getirme hatası:', error);
+    return { fixed_cost_per_unit: 25, aluminium_cost_per_cm: 0.8 };
+  }
+});
+
+ipcMain.handle('db-update-cost-settings', async (event, fixedCostPerUnit, aluminiumCostPerCm) => {
+  try {
+    return await database.updateCostSettings(fixedCostPerUnit, aluminiumCostPerCm);
+  } catch (error) {
+    console.error('Maliyet ayarları güncelleme hatası:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('db-add-calculation', async (event, calculation) => {
+  try {
+    const { fabricSeriesId, width, height, quantity, unitPrice, totalPrice, unitCost, totalCost, profit } = calculation;
+    return await database.addCalculation(fabricSeriesId, width, height, quantity, unitPrice, totalPrice, unitCost, totalCost, profit);
+  } catch (error) {
+    console.error('Hesaplama ekleme hatası:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('db-get-calculations', async (event, limit = null) => {
+  try {
+    return await database.getCalculations(limit);
+  } catch (error) {
+    console.error('Hesaplamaları getirme hatası:', error);
+    return [];
+  }
+});
+
+ipcMain.handle('db-delete-calculation', async (event, id) => {
+  try {
+    return await database.deleteCalculation(id);
+  } catch (error) {
+    console.error('Hesaplama silme hatası:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('db-clear-calculations', async () => {
+  try {
+    return await database.clearAllCalculations();
+  } catch (error) {
+    console.error('Hesaplamaları temizleme hatası:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('db-get-calculation-stats', async () => {
+  try {
+    return await database.getCalculationStats();
+  } catch (error) {
+    console.error('Hesaplama istatistikleri getirme hatası:', error);
+    return {
+      total_calculations: 0,
+      total_revenue: 0,
+      total_cost: 0,
+      total_profit: 0,
+      average_profit: 0
+    };
   }
 });
 

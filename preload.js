@@ -1,5 +1,4 @@
 const { contextBridge, ipcRenderer, shell } = require('electron');
-const fs = require('fs');
 const path = require('path');
 
 // Expose protected methods that allow the renderer process to use
@@ -13,35 +12,37 @@ contextBridge.exposeInMainWorld('electronAPI', {
   maximizeWindow: () => ipcRenderer.invoke('window-maximize'),
   closeWindow: () => ipcRenderer.invoke('window-close'),
   
-  // File system operations
+  // Database operations - Fabric Series
+  getFabricSeries: () => ipcRenderer.invoke('db-get-fabric-series'),
+  addFabricSeries: (name, price, cost) => ipcRenderer.invoke('db-add-fabric-series', name, price, cost),
+  updateFabricSeries: (id, name, price, cost) => ipcRenderer.invoke('db-update-fabric-series', id, name, price, cost),
+  deleteFabricSeries: (id) => ipcRenderer.invoke('db-delete-fabric-series', id),
+  
+  // Database operations - Cost Settings
+  getCostSettings: () => ipcRenderer.invoke('db-get-cost-settings'),
+  updateCostSettings: (fixedCostPerUnit, aluminiumCostPerCm) => ipcRenderer.invoke('db-update-cost-settings', fixedCostPerUnit, aluminiumCostPerCm),
+  
+  // Database operations - Calculations
+  addCalculation: (calculation) => ipcRenderer.invoke('db-add-calculation', calculation),
+  getCalculations: (limit) => ipcRenderer.invoke('db-get-calculations', limit),
+  deleteCalculation: (id) => ipcRenderer.invoke('db-delete-calculation', id),
+  clearCalculations: () => ipcRenderer.invoke('db-clear-calculations'),
+  getCalculationStats: () => ipcRenderer.invoke('db-get-calculation-stats'),
+  
+  // File system operations (deprecated - kept for compatibility)
   readFile: (filePath) => {
-    try {
-      const resolvedPath = path.resolve(filePath);
-      return fs.readFileSync(resolvedPath, 'utf8');
-    } catch (error) {
-      console.error('Error reading file:', error);
-      return null;
-    }
+    console.warn('readFile is deprecated. Using SQLite database instead.');
+    return Promise.resolve(null);
   },
   
   writeFile: (filePath, data) => {
-    try {
-      const resolvedPath = path.resolve(filePath);
-      fs.writeFileSync(resolvedPath, data, 'utf8');
-      return true;
-    } catch (error) {
-      console.error('Error writing file:', error);
-      return false;
-    }
+    console.warn('writeFile is deprecated. Using SQLite database instead.');
+    return Promise.resolve(false);
   },
   
   fileExists: (filePath) => {
-    try {
-      const resolvedPath = path.resolve(filePath);
-      return fs.existsSync(resolvedPath);
-    } catch (error) {
-      return false;
-    }
+    console.warn('fileExists is deprecated. Using SQLite database instead.');
+    return Promise.resolve(false);
   },
   
   // Path utilities

@@ -134,31 +134,65 @@ function refreshApp() {
 }
 
 function exportData() {
-    const data = {
-        calculations: getAllCalculations(),
-        timestamp: new Date().toISOString(),
-        version: '2.0.0'
-    };
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `plise-perde-hesaplamalari-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    
-    showDesktopNotification('Dışa Aktarma', 'Hesaplamalar başarıyla dışa aktarıldı!', 'success');
+    // SQLite verilerini al ve dışa aktar
+    Promise.all([
+        window.electronAPI.getCalculations(),
+        window.electronAPI.getFabricSeries(),
+        window.electronAPI.getCostSettings(),
+        window.electronAPI.getCalculationStats()
+    ]).then(([calculations, fabricSeries, costSettings, stats]) => {
+        const data = {
+            calculations: calculations,
+            fabricSeries: fabricSeries,
+            costSettings: costSettings,
+            stats: stats,
+            timestamp: new Date().toISOString(),
+            version: '2.0.0',
+            exportType: 'SQLite Database Export'
+        };
+        
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `plise-perde-database-export-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        
+        showDesktopNotification('Dışa Aktarma', 'Veritabanı başarıyla dışa aktarıldı!', 'success');
+    }).catch(error => {
+        console.error('Dışa aktarma hatası:', error);
+        showDesktopNotification('Hata', 'Dışa aktarma sırasında hata oluştu!', 'error');
+    });
 }
 
 function getAllCalculations() {
-    // Bu fonksiyonu hesaplama verilerini toplamak için genişletebilirsiniz
-    return {
+    // SQLite'dan verileri almaya çalış, yoksa basit fallback
+    if (window.electronAPI && window.electronAPI.getCalculations) {
+        return window.electronAPI.getCalculations().then(calculations => {
+            return {
+                calculations: calculations,
+                totalCalculations: calculations.length,
+                lastCalculation: calculations.length > 0 ? calculations[0] : null
+            };
+        }).catch(() => {
+            return {
+                calculations: [],
+                totalCalculations: 0,
+                lastCalculation: null
+            };
+        });
+    }
+    
+    // Fallback for non-Electron environments
+    return Promise.resolve({
+        calculations: [],
+        totalCalculations: 0,
         lastCalculation: {
             width: document.getElementById('width')?.value || 0,
             height: document.getElementById('height')?.value || 0,
-            total: document.getElementById('total')?.textContent || '0'
+            total: document.getElementById('totalPrice')?.textContent || '0'
         }
-    };
+    });
 }
 
 function printCalculation() {
@@ -348,10 +382,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-module.exports = {
-    minimizeWindow,
-    maximizeWindow,
-    closeWindow,
-    showDesktopNotification,
-    updateCalculationCount
-};
+// Desktop controls module for Electron app
+// This module is automatically loaded and doesn't need CommonJS exports
+
+// Window control functions
+function minimizeWindow() {
+    if (window.electronAPI && window.electronAPI.minimizeWindow) {
+        window.electronAPI.minimizeWindow();
+    }
+}
+
+function maximizeWindow() {
+    if (window.electronAPI && window.electronAPI.maximizeWindow) {
+        window.electronAPI.maximizeWindow();
+    }
+}
+
+function closeWindow() {
+    if (window.electronAPI && window.electronAPI.closeWindow) {
+        window.electronAPI.closeWindow();
+    }
+}

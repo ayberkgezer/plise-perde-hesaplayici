@@ -19,6 +19,7 @@
     "build:linux": "electron-builder --linux",
     "dist": "electron-builder --publish=never",
     "pack": "electron-builder --dir",
+    "migrate": "node migrate-data.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -40,7 +41,6 @@
       "preload.js",
       "index.html",
       "renderer.js",
-      "data.json",
       "src/**/*",
       "node_modules/**/*",
       "package.json"
@@ -66,6 +66,9 @@
     }
   },
   "type": "commonjs",
+  "dependencies": {
+    "sqlite3": "^5.1.6"
+  },
   "devDependencies": {
     "electron": "^37.2.3",
     "electron-builder": "^24.13.3"

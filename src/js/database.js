@@ -1,0 +1,428 @@
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+
+class DatabaseManager {
+    constructor() {
+        this.dbPath = path.join(__dirname, '../../database.sqlite');
+        this.db = null;
+    }
+
+    // Veritabanı bağlantısını aç
+    connect() {
+        return new Promise((resolve, reject) => {
+            this.db = new sqlite3.Database(this.dbPath, (err) => {
+                if (err) {
+                    console.error('Veritabanı bağlantı hatası:', err.message);
+                    reject(err);
+                } else {
+                    console.log('SQLite veritabanına bağlandı.');
+                    this.initializeTables()
+                        .then(() => {
+                            console.log('Veritabanı tabloları hazır.');
+                            resolve();
+                        })
+                        .catch((initErr) => {
+                            console.error('Tablo başlatma hatası:', initErr);
+                            reject(initErr);
+                        });
+                }
+            });
+        });
+    }
+
+    // Veritabanı tablolarını oluştur
+    initializeTables() {
+        return new Promise((resolve, reject) => {
+            // İlk önce temel tabloları oluştur
+            const tableQueries = [
+                // Kumaş serileri tablosu
+                `CREATE TABLE IF NOT EXISTS fabric_series (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT NOT NULL UNIQUE,
+                    price REAL NOT NULL,
+                    cost REAL NOT NULL,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                )`,
+                
+                // Maliyet ayarları tablosu
+                `CREATE TABLE IF NOT EXISTS cost_settings (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    fixed_cost_per_unit REAL NOT NULL DEFAULT 25,
+                    aluminium_cost_per_cm REAL NOT NULL DEFAULT 0.8,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                )`,
+                
+                // Hesaplamalar tablosu
+                `CREATE TABLE IF NOT EXISTS calculations (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    fabric_series_id INTEGER,
+                    width REAL NOT NULL,
+                    height REAL NOT NULL,
+                    quantity INTEGER NOT NULL DEFAULT 1,
+                    unit_price REAL NOT NULL,
+                    total_price REAL NOT NULL,
+                    unit_cost REAL NOT NULL,
+                    total_cost REAL NOT NULL,
+                    profit REAL NOT NULL,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (fabric_series_id) REFERENCES fabric_series (id)
+                )`
+            ];
+
+            let completed = 0;
+            let hasError = false;
+            
+            tableQueries.forEach((query, index) => {
+                this.db.run(query, (err) => {
+                    if (hasError) return; // Zaten hata varsa devam etme
+                    
+                    if (err) {
+                        console.error(`Tablo oluşturma hatası ${index}:`, err.message);
+                        hasError = true;
+                        reject(err);
+                    } else {
+                        completed++;
+                        console.log(`Tablo ${index + 1}/${tableQueries.length} oluşturuldu`);
+                        
+                        if (completed === tableQueries.length) {
+                            // Tablolar oluşturulduktan sonra trigger'ları ekle
+                            this.createTriggers().then(() => {
+                                this.initializeDefaultData().then(resolve).catch(reject);
+                            }).catch(reject);
+                        }
+                    }
+                });
+            });
+        });
+    }
+
+    // Trigger'ları oluştur
+    createTriggers() {
+        return new Promise((resolve, reject) => {
+            const triggerQueries = [
+                // Trigger for updated_at
+                `CREATE TRIGGER IF NOT EXISTS update_fabric_series_timestamp 
+                 AFTER UPDATE ON fabric_series
+                 FOR EACH ROW
+                 BEGIN
+                     UPDATE fabric_series SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+                 END`,
+                
+                `CREATE TRIGGER IF NOT EXISTS update_cost_settings_timestamp 
+                 AFTER UPDATE ON cost_settings
+                 FOR EACH ROW
+                 BEGIN
+                     UPDATE cost_settings SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+                 END`
+            ];
+
+            let completed = 0;
+            let hasError = false;
+            
+            if (triggerQueries.length === 0) {
+                resolve();
+                return;
+            }
+            
+            triggerQueries.forEach((query, index) => {
+                this.db.run(query, (err) => {
+                    if (hasError) return;
+                    
+                    if (err) {
+                        console.error(`Trigger oluşturma hatası ${index}:`, err.message);
+                        // Trigger hataları kritik olmayabilir, ancak logla
+                    }
+                    
+                    completed++;
+                    if (completed === triggerQueries.length) {
+                        console.log('Trigger\'lar oluşturuldu');
+                        resolve();
+                    }
+                });
+            });
+        });
+    }
+
+    // Varsayılan verileri ekle
+    initializeDefaultData() {
+        return new Promise((resolve, reject) => {
+            // Önce mevcut verileri kontrol et
+            this.db.get("SELECT COUNT(*) as count FROM fabric_series", (err, row) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+
+                // Eğer kumaş verisi yoksa, varsayılanları ekle
+                if (row.count === 0) {
+                    const fabricInserts = [
+                        { name: 'Standart Plise', price: 350, cost: 180 },
+                        { name: 'Blackout Plise', price: 450, cost: 220 },
+                        { name: 'Premium Plise', price: 650, cost: 350 }
+                    ];
+
+                    let completed = 0;
+                    fabricInserts.forEach((fabric) => {
+                        this.addFabricSeries(fabric.name, fabric.price, fabric.cost)
+                            .then(() => {
+                                completed++;
+                                if (completed === fabricInserts.length) {
+                                    this.initializeCostSettings().then(resolve).catch(reject);
+                                }
+                            })
+                            .catch(reject);
+                    });
+                } else {
+                    this.initializeCostSettings().then(resolve).catch(reject);
+                }
+            });
+        });
+    }
+
+    // Maliyet ayarlarını başlat
+    initializeCostSettings() {
+        return new Promise((resolve, reject) => {
+            console.log('initializeCostSettings called');
+            this.db.get("SELECT COUNT(*) as count FROM cost_settings", (err, row) => {
+                if (err) {
+                    console.error('initializeCostSettings count error:', err);
+                    reject(err);
+                    return;
+                }
+
+                console.log('cost_settings count:', row.count);
+                if (row.count === 0) {
+                    console.log('No cost_settings found, inserting default values...');
+                    this.db.run(
+                        "INSERT INTO cost_settings (fixed_cost_per_unit, aluminium_cost_per_cm) VALUES (?, ?)",
+                        [25, 0.8],
+                        (err) => {
+                            if (err) {
+                                console.error('initializeCostSettings insert error:', err);
+                                reject(err);
+                            } else {
+                                console.log('Default cost_settings inserted successfully');
+                                resolve();
+                            }
+                        }
+                    );
+                } else {
+                    console.log('cost_settings already exist, skipping initialization');
+                    resolve();
+                }
+            });
+        });
+    }
+
+    // Kumaş serileri yönetimi
+    getFabricSeries() {
+        return new Promise((resolve, reject) => {
+            this.db.all("SELECT * FROM fabric_series ORDER BY name", (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows);
+            });
+        });
+    }
+
+    addFabricSeries(name, price, cost) {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                "INSERT INTO fabric_series (name, price, cost) VALUES (?, ?, ?)",
+                [name, price, cost],
+                function(err) {
+                    if (err) reject(err);
+                    else resolve({ id: this.lastID, name, price, cost });
+                }
+            );
+        });
+    }
+
+    updateFabricSeries(id, name, price, cost) {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                "UPDATE fabric_series SET name = ?, price = ?, cost = ? WHERE id = ?",
+                [name, price, cost, id],
+                (err) => {
+                    if (err) reject(err);
+                    else resolve({ id, name, price, cost });
+                }
+            );
+        });
+    }
+
+    deleteFabricSeries(id) {
+        return new Promise((resolve, reject) => {
+            this.db.run("DELETE FROM fabric_series WHERE id = ?", [id], (err) => {
+                if (err) reject(err);
+                else resolve();
+            });
+        });
+    }
+
+    // Maliyet ayarları yönetimi
+    getCostSettings() {
+        return new Promise((resolve, reject) => {
+            console.log('getCostSettings called');
+            this.db.get("SELECT * FROM cost_settings ORDER BY id DESC LIMIT 1", (err, row) => {
+                if (err) {
+                    console.error('getCostSettings error:', err);
+                    reject(err);
+                } else {
+                    console.log('getCostSettings result:', row);
+                    const result = row || { fixed_cost_per_unit: 25, aluminium_cost_per_cm: 0.8 };
+                    console.log('getCostSettings returning:', result);
+                    resolve(result);
+                }
+            });
+        });
+    }
+
+    updateCostSettings(fixedCostPerUnit, aluminiumCostPerCm) {
+        return new Promise((resolve, reject) => {
+            console.log('updateCostSettings called with:', { fixedCostPerUnit, aluminiumCostPerCm });
+            
+            const db = this.db; // Database reference'ını sakla
+            
+            // Önce mevcut kayıt var mı kontrol et
+            db.get("SELECT id FROM cost_settings ORDER BY id DESC LIMIT 1", (err, row) => {
+                if (err) {
+                    console.error('SELECT error:', err);
+                    reject(err);
+                    return;
+                }
+                
+                if (row) {
+                    // Mevcut kaydı güncelle
+                    console.log('Updating existing record with ID:', row.id);
+                    db.run(
+                        "UPDATE cost_settings SET fixed_cost_per_unit = ?, aluminium_cost_per_cm = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                        [fixedCostPerUnit, aluminiumCostPerCm, row.id],
+                        function(updateErr) {
+                            if (updateErr) {
+                                console.error('UPDATE error:', updateErr);
+                                reject(updateErr);
+                            } else {
+                                console.log('UPDATE successful, changes:', this.changes);
+                                resolve();
+                            }
+                        }
+                    );
+                } else {
+                    // Yeni kayıt ekle
+                    console.log('No existing record found, inserting new one...');
+                    db.run(
+                        "INSERT INTO cost_settings (fixed_cost_per_unit, aluminium_cost_per_cm, created_at, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+                        [fixedCostPerUnit, aluminiumCostPerCm],
+                        function(insertErr) {
+                            if (insertErr) {
+                                console.error('INSERT error:', insertErr);
+                                reject(insertErr);
+                            } else {
+                                console.log('INSERT successful, lastID:', this.lastID);
+                                resolve();
+                            }
+                        }
+                    );
+                }
+            });
+        });
+    }
+
+    // Hesaplamalar yönetimi
+    addCalculation(fabricSeriesId, width, height, quantity, unitPrice, totalPrice, unitCost, totalCost, profit) {
+        return new Promise((resolve, reject) => {
+            this.db.run(
+                `INSERT INTO calculations 
+                 (fabric_series_id, width, height, quantity, unit_price, total_price, unit_cost, total_cost, profit) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [fabricSeriesId, width, height, quantity, unitPrice, totalPrice, unitCost, totalCost, profit],
+                function(err) {
+                    if (err) reject(err);
+                    else resolve({ id: this.lastID });
+                }
+            );
+        });
+    }
+
+    getCalculations(limit = null) {
+        return new Promise((resolve, reject) => {
+            const query = `
+                SELECT c.*, f.name as fabric_name 
+                FROM calculations c 
+                LEFT JOIN fabric_series f ON c.fabric_series_id = f.id 
+                ORDER BY c.created_at DESC
+                ${limit ? `LIMIT ${limit}` : ''}
+            `;
+            
+            this.db.all(query, (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows);
+            });
+        });
+    }
+
+    deleteCalculation(id) {
+        return new Promise((resolve, reject) => {
+            this.db.run("DELETE FROM calculations WHERE id = ?", [id], (err) => {
+                if (err) reject(err);
+                else resolve();
+            });
+        });
+    }
+
+    clearAllCalculations() {
+        return new Promise((resolve, reject) => {
+            this.db.run("DELETE FROM calculations", (err) => {
+                if (err) reject(err);
+                else resolve();
+            });
+        });
+    }
+
+    // Toplam istatistikler
+    getCalculationStats() {
+        return new Promise((resolve, reject) => {
+            this.db.get(`
+                SELECT 
+                    COUNT(*) as total_calculations,
+                    SUM(total_price) as total_revenue,
+                    SUM(total_cost) as total_cost,
+                    SUM(profit) as total_profit,
+                    AVG(profit) as average_profit
+                FROM calculations
+            `, (err, row) => {
+                if (err) reject(err);
+                else resolve(row || {
+                    total_calculations: 0,
+                    total_revenue: 0,
+                    total_cost: 0,
+                    total_profit: 0,
+                    average_profit: 0
+                });
+            });
+        });
+    }
+
+    // Veritabanı bağlantısını kapat
+    close() {
+        return new Promise((resolve, reject) => {
+            if (this.db) {
+                this.db.close((err) => {
+                    if (err) {
+                        console.error('Veritabanı kapatma hatası:', err.message);
+                        reject(err);
+                    } else {
+                        console.log('Veritabanı bağlantısı kapatıldı.');
+                        resolve();
+                    }
+                });
+            } else {
+                resolve();
+            }
+        });
+    }
+}
+
+module.exports = DatabaseManager;

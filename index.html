@@ -1,8 +1,9 @@
-<!DOCTYPE html>
+<!DOC    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data:; connect-src 'self';">"YPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data:;">
     <title>Perde Hesaplama - Tengra Works</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -374,6 +375,8 @@
                         <table class="cost-table">
                             <thead>
                                 <tr>
+                                    <th>Kumaş</th>
+                                    <th>Ölçü (cm)</th>
                                     <th>Adet</th>
                                     <th>Kumaş Maliyeti</th>
                                     <th>Sabit Gider</th>
@@ -410,15 +413,18 @@
             </div>
 
             <div id="database" class="view">
+                <!-- Kumaş Yönetimi Tablosu -->
                 <div class="container">
                     <h2><span class="icon icon-database"></span> Kumaş Veritabanı</h2>
                     <div class="table-container">
                         <table class="modern-table">
                             <thead>
                                 <tr>
+                                    <th>ID</th>
                                     <th><span class="icon icon-palette"></span> Kumaş Adı</th>
                                     <th><span class="icon icon-money"></span> Fiyat (m²)</th>
                                     <th><span class="icon icon-calculator"></span> Maliyet (m²)</th>
+                                    <th>Oluşturma Tarihi</th>
                                     <th><span class="icon icon-settings"></span> İşlemler</th>
                                 </tr>
                             </thead>
@@ -428,6 +434,8 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- Yeni Kumaş Ekleme Formu -->
                 <div class="container">
                     <h2><span class="icon icon-plus"></span> Yeni Kumaş Ekle</h2>
                     <div class="input-grid">
@@ -453,9 +461,31 @@
                     <input type="hidden" id="editIndex" value="-1">
                 </div>
                 
-                <!-- Maliyet Ayarları Bölümü -->
+                <!-- Maliyet Ayarları Tablosu -->
                 <div class="container">
-                    <h2><span class="icon icon-settings"></span> Maliyet Ayarları</h2>
+                    <h2><span class="icon icon-settings"></span> Maliyet Ayarları Veritabanı</h2>
+                    <div class="table-container">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th><span class="icon icon-money"></span> Adet Başı Sabit Gider (TL)</th>
+                                    <th><span class="icon icon-calculator"></span> Alüminyum Maliyeti (TL/cm)</th>
+                                    <th>Oluşturma Tarihi</th>
+                                    <th>Güncelleme Tarihi</th>
+                                    <th><span class="icon icon-settings"></span> İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody id="costSettingsTable">
+                                <!-- Maliyet ayarları verileri buraya eklenecek -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Maliyet Ayarları Düzenleme -->
+                <div class="container">
+                    <h2><span class="icon icon-settings"></span> Maliyet Ayarlarını Düzenle</h2>
                     <div class="input-grid">
                         <div class="form-group">
                             <label for="fixedCostPerUnit"><span class="icon icon-money"></span> Adet Başı Sabit Gider (TL)</label>
