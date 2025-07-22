@@ -69,7 +69,6 @@
           "arch": ["x64"]
         }
       ],
-      "icon": "src/assets/images/icon.ico",
       "artifactName": "${productName}-${version}-${arch}.${ext}",
       "requestedExecutionLevel": "asInvoker"
     },
@@ -77,9 +76,7 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "installerIcon": "src/assets/images/icon.ico",
-      "uninstallerIcon": "src/assets/images/icon.ico"
+      "createStartMenuShortcut": true
     },
     "portable": {
       "artifactName": "${productName}-${version}-portable-${arch}.${ext}"
