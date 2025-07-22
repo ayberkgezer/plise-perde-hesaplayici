@@ -1,20 +1,83 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const { app } = require('electron');
+const fs = require('fs');
 
 class DatabaseManager {
     constructor() {
-        this.dbPath = path.join(__dirname, '../../database.sqlite');
+        if (app && app.isPackaged) {
+            // Build edilmiş uygulama için: executable'ın bulunduğu klasörde 'data' klasörü oluştur
+            // Bu hem Windows hem macOS hem Linux için çalışır
+            const execPath = process.execPath;
+            const appDir = path.dirname(execPath);
+            
+            // Windows'ta portable uygulama için özel kontrol
+            const isWindowsPortable = process.platform === 'win32' && 
+                                    (execPath.includes('portable') || 
+                                     !execPath.includes('Program Files') && 
+                                     !execPath.includes('AppData'));
+            
+            let dataDir;
+            if (isWindowsPortable) {
+                // Windows portable versiyonu için uygulama klasöründe 'data' klasörü
+                dataDir = path.join(appDir, 'data');
+            } else {
+                // Normal kurulum için uygulama klasöründe 'data' klasörü
+                dataDir = path.join(appDir, 'data');
+            }
+            
+            this.dbPath = path.join(dataDir, 'database.sqlite');
+        } else {
+            // Development için mevcut yol
+            this.dbPath = path.join(__dirname, '../../database.sqlite');
+        }
+        
         this.db = null;
+        this.ensureDatabaseDirectory();
+    }
+
+    // Veritabanı klasörünün var olduğundan emin ol
+    ensureDatabaseDirectory() {
+        const dbDir = path.dirname(this.dbPath);
+        
+        try {
+            if (!fs.existsSync(dbDir)) {
+                fs.mkdirSync(dbDir, { recursive: true });
+            }
+            
+            // Yazma izni kontrol et
+            fs.accessSync(dbDir, fs.constants.W_OK);
+            console.log('Veritabanı klasörü hazır:', dbDir);
+        } catch (error) {
+            console.warn('Veritabanı klasörü oluşturulamadı veya yazma izni yok:', error.message);
+            
+            // Hata durumunda userData klasörüne geç
+            if (app) {
+                const fallbackPath = path.join(app.getPath('userData'), 'database.sqlite');
+                console.log('Alternatif yol kullanılıyor:', fallbackPath);
+                this.dbPath = fallbackPath;
+                
+                const fallbackDir = path.dirname(fallbackPath);
+                if (!fs.existsSync(fallbackDir)) {
+                    fs.mkdirSync(fallbackDir, { recursive: true });
+                }
+            }
+        }
     }
 
     // Veritabanı bağlantısını aç
     connect() {
         return new Promise((resolve, reject) => {
-            this.db = new sqlite3.Database(this.dbPath, (err) => {
+            // Veritabanı dosyasının var olduğundan emin ol
+            this.ensureDatabaseDirectory();
+            
+            this.db = new sqlite3.Database(this.dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
                 if (err) {
                     console.error('Veritabanı bağlantı hatası:', err.message);
+                    console.error('Veritabanı yolu:', this.dbPath);
                     reject(err);
                 } else {
+                    console.log('Veritabanı başarıyla açıldı:', this.dbPath);
                     this.initializeTables()
                         .then(() => {
                             resolve();

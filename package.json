@@ -13,13 +13,16 @@
   "scripts": {
     "start": "electron .",
     "build": "electron-builder",
-    "build:mac": "electron-builder --mac",
-    "build:win": "electron-builder --win",
-    "build:linux": "electron-builder --linux",
+    "build:mac": "electron-builder --mac --publish=never",
+    "build:win": "electron-builder --win --publish=never",
+    "build:linux": "electron-builder --linux --publish=never",
+    "build:all": "electron-builder --mac --win --linux --publish=never",
     "dist": "electron-builder --publish=never",
     "pack": "electron-builder --dir",
     "migrate": "node migrate-data.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "electron-builder install-app-deps",
+    "release": "electron-builder --publish=always"
   },
   "keywords": [
     "perde",
@@ -42,7 +45,8 @@
       "renderer.js",
       "src/**/*",
       "node_modules/**/*",
-      "package.json"
+      "package.json",
+      "database.sqlite"
     ],
     "mac": {
       "category": "public.app-category.business",
@@ -56,8 +60,30 @@
       }
     },
     "win": {
-      "target": "nsis",
-      "icon": "src/assets/images/icon.ico"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "src/assets/images/icon.ico",
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "installerIcon": "src/assets/images/icon.ico",
+      "uninstallerIcon": "src/assets/images/icon.ico"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-portable-${arch}.${ext}"
     },
     "linux": {
       "target": "AppImage",
