@@ -11,28 +11,19 @@ function waitForDOMReady() {
 }
 
 async function initializeApp() {
-    console.log('DOM loaded, starting application initialization...');
-    console.log('Document ready state:', document.readyState);
-    
     // DOM'un tam yüklendiğini bekle
     await waitForDOMReady();
-    console.log('DOM fully loaded');
     
     // Platform Detection - Title bar'ı platform bazında ayarla
     const titleBar = document.querySelector('.title-bar');
     const titleBarControls = document.getElementById('title-bar-controls');
     const isMac = window.electronAPI?.platform === 'darwin' || navigator.platform.toUpperCase().indexOf('MAC') >= 0;
     
-    console.log('Platform detected:', isMac ? 'macOS' : 'Windows/Linux');
-    console.log('electronAPI available:', !!window.electronAPI);
-    
     // Wait for electronAPI to be available if not yet ready
     if (!window.electronAPI) {
-        console.warn('electronAPI not available yet, waiting...');
         await new Promise(resolve => {
             const checkAPI = () => {
                 if (window.electronAPI) {
-                    console.log('electronAPI now available');
                     resolve();
                 } else {
                     setTimeout(checkAPI, 100);
@@ -49,7 +40,6 @@ async function initializeApp() {
         titleBar?.classList.add('win-platform');
         titleBarControls?.classList.add('win-platform');
     }    // --- Element Referansları ---
-    console.log('Getting element references...');
     
     // DOM'un tam hazır olmasını bekle
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -62,17 +52,8 @@ async function initializeApp() {
     const heightInput = document.getElementById('height');
     const quantityInput = document.getElementById('quantity');
 
-    console.log('Core elements found:');
-    console.log('- fabricTypeSelect:', !!fabricTypeSelect);
-    console.log('- calculateBtn:', !!calculateBtn);
-    console.log('- widthInput:', !!widthInput);
-    console.log('- heightInput:', !!heightInput);
-    console.log('- quantityInput:', !!quantityInput);
-    
     if (!fabricTypeSelect) {
-        console.error('CRITICAL: fabricTypeSelect not found! Available elements with ID:');
-        const allElementsWithId = document.querySelectorAll('[id]');
-        allElementsWithId.forEach(el => console.log('  -', el.id, el.tagName));
+        showNotification('Kritik form alanları bulunamadı!', 'error');
     }
 
     // Navigation Elements
@@ -142,73 +123,53 @@ async function initializeApp() {
 
     // --- Database Functions ---
     async function loadFabricSeries() {
-        console.log('Loading fabric series...');
         try {
             if (!window.electronAPI) {
                 throw new Error('electronAPI not available');
             }
             fabricSeries = await window.electronAPI.getFabricSeries();
-            console.log('Fabric series loaded:', fabricSeries);
             renderFabricDropdown();
             renderFabricManagementTable();
         } catch (error) {
-            console.error('Kumaş serileri yüklenirken hata:', error);
             showNotification('Kumaş serileri yüklenemedi!', 'error');
         }
     }
 
     async function loadCostSettings() {
-        console.log('Loading cost settings...');
         try {
             if (!window.electronAPI) {
                 throw new Error('electronAPI not available');
             }
             const oldSettings = { ...costSettings };
             costSettings = await window.electronAPI.getCostSettings();
-            console.log('Cost settings loaded:', costSettings);
-            console.log('Old settings:', oldSettings);
             
             if (fixedCostPerUnitInput) {
-                console.log('Updating fixedCostPerUnitInput from', fixedCostPerUnitInput.value, 'to', costSettings.fixed_cost_per_unit || 25);
                 fixedCostPerUnitInput.value = costSettings.fixed_cost_per_unit || 25;
             }
             if (aluminiumCostPerCmInput) {
-                console.log('Updating aluminiumCostPerCmInput from', aluminiumCostPerCmInput.value, 'to', costSettings.aluminium_cost_per_cm || 0.8);
                 aluminiumCostPerCmInput.value = costSettings.aluminium_cost_per_cm || 0.8;
             }
             
-            // Maliyet ayarları tablosunu render et
-            console.log('Rendering cost settings table...');
             renderCostSettingsTable();
-            console.log('Cost settings table rendered');
         } catch (error) {
-            console.error('Maliyet ayarları yüklenirken hata:', error);
             showNotification('Maliyet ayarları yüklenemedi!', 'error');
         }
     }
 
     async function loadCalculations() {
-        console.log('Loading calculations from memory...');
         // Hafızadan yükleme yapıyoruz, veritabanından değil
         // calculations zaten hafızada tutuluyor
         renderCalculationResult();
-        console.log('Calculations loaded from memory:', calculations.length, 'items');
     }
 
     // --- UI Rendering Functions ---
     function renderFabricDropdown() {
-        console.log('Rendering fabric dropdown...');
-        console.log('fabricTypeSelect element:', fabricTypeSelect);
-        console.log('fabricSeries data:', fabricSeries);
-        
         if (!fabricTypeSelect) {
-            console.error('fabricTypeSelect element not found!');
             return;
         }
         
         fabricTypeSelect.innerHTML = '<option value="">Kumaş Tipi Seçin</option>';
         fabricSeries.forEach(fabric => {
-            console.log('Adding fabric option:', fabric);
             const option = document.createElement('option');
             option.value = fabric.id;
             option.textContent = `${fabric.name} - ${fabric.price}₺/m²`;
@@ -216,7 +177,6 @@ async function initializeApp() {
             option.dataset.cost = fabric.cost;
             fabricTypeSelect.appendChild(option);
         });
-        console.log('Fabric dropdown rendered with', fabricSeries.length, 'items');
     }
 
     function renderFabricManagementTable() {
@@ -249,13 +209,9 @@ async function initializeApp() {
     }
 
     function renderCostSettingsTable() {
-        console.log('renderCostSettingsTable called');
         const costSettingsTable = document.getElementById('costSettingsTable');
-        console.log('costSettingsTable element:', costSettingsTable);
-        console.log('costSettings data:', costSettings);
         
         if (!costSettingsTable || !costSettings) {
-            console.log('Tablo elementi bulunamadı veya costSettings boş');
             return;
         }
         
@@ -263,7 +219,6 @@ async function initializeApp() {
         
         // Maliyet ayarları tek bir kayıt olduğu için array olarak sarmalayalım
         const settingsArray = Array.isArray(costSettings) ? costSettings : [costSettings];
-        console.log('settingsArray:', settingsArray);
         
         settingsArray.forEach((settings, index) => {
             const row = document.createElement('tr');
@@ -289,10 +244,7 @@ async function initializeApp() {
     }
 
     function renderCalculationResult() {
-        console.log('renderCalculationResult called, calculations:', calculations.length);
-        
         if (!resultTable) {
-            console.error('resultTable not found!');
             return;
         }
         
@@ -340,7 +292,6 @@ async function initializeApp() {
         }
         
         calculationCount = calculations.length;
-        console.log('Table rendered with', calculations.length, 'rows');
     }
 
     function resetFabricForm() {
@@ -426,7 +377,6 @@ async function initializeApp() {
             fabricTypeSelect.selectedIndex = 0;
 
         } catch (error) {
-            console.error('Hesaplama hatası:', error);
             showNotification('Hesaplama eklenirken hata oluştu!', 'error');
         }
     }
@@ -464,16 +414,12 @@ async function initializeApp() {
             costAnalysisDiv.style.display = 'block';
             showNotification('Maliyet analizi hesaplandı!', 'success');
         } catch (error) {
-            console.error('Maliyet analizi hatası:', error);
             showNotification('Maliyet analizi hesaplanırken hata oluştu!', 'error');
         }
     }
 
     function renderCostAnalysis() {
-        console.log('renderCostAnalysis called');
-        
         if (!costTable) {
-            console.error('costTable not found!');
             return;
         }
         
@@ -508,7 +454,6 @@ async function initializeApp() {
             `;
             costTable.appendChild(row);
         });
-        console.log('Cost analysis table rendered with', calculations.length, 'rows');
     }
 
     async function clearCostAnalysis() {
@@ -581,7 +526,6 @@ async function initializeApp() {
                 await loadFabricSeries();
                 showNotification('Kumaş serisi başarıyla silindi!', 'success');
             } catch (error) {
-                console.error('Kumaş silme hatası:', error);
                 showNotification('Kumaş serisi silinirken hata oluştu!', 'error');
             }
         }
@@ -589,10 +533,6 @@ async function initializeApp() {
 
     // Eski veritabanı tabanlı silme fonksiyonu artık kullanılmıyor
     // removeCalculationFromMemory fonksiyonu kullanılıyor
-    window.removeCalculation = async function(id) {
-        // Bu fonksiyon artık kullanılmıyor, sadece geriye dönük uyumluluk için
-        console.log('removeCalculation called with id:', id, '- Bu fonksiyon artık kullanılmıyor');
-    };
 
     window.editCostSettings = function() {
         // Form alanlarına mevcut değerleri yükle
@@ -683,7 +623,6 @@ async function initializeApp() {
                 await loadFabricSeries();
                 resetFabricForm();
             } catch (error) {
-                console.error('Kumaş kaydetme hatası:', error);
                 showNotification('Kumaş serisi kaydedilirken hata oluştu!', 'error');
             }
         });
@@ -697,31 +636,22 @@ async function initializeApp() {
     // Cost Settings Save Button
     if (saveCostSettingsBtn) {
         saveCostSettingsBtn.addEventListener('click', async () => {
-            console.log('Maliyet ayarları kaydet butonuna tıklandı');
             const fixedCost = parseFloat(fixedCostPerUnitInput.value);
             const aluminiumCost = parseFloat(aluminiumCostPerCmInput.value);
 
-            console.log('Girilen değerler:', { fixedCost, aluminiumCost });
-
             if (isNaN(fixedCost) || isNaN(aluminiumCost)) {
-                console.log('Geçersiz değerler tespit edildi');
                 showNotification('Lütfen geçerli değerler girin!', 'error');
                 return;
             }
 
             try {
-                console.log('Veritabanı güncelleme başlıyor...');
                 await window.electronAPI.updateCostSettings(fixedCost, aluminiumCost);
-                console.log('Veritabanı güncelleme başarılı');
                 
                 // Maliyet ayarlarını güncelle
-                console.log('Maliyet ayarları yeniden yükleniyor...');
                 await loadCostSettings();
-                console.log('Maliyet ayarları yeniden yüklendi');
                 
                 showNotification('Maliyet ayarları başarıyla kaydedildi!', 'success');
             } catch (error) {
-                console.error('Maliyet ayarları kaydetme hatası:', error);
                 showNotification('Maliyet ayarları kaydedilirken hata oluştu!', 'error');
             }
         });
@@ -831,27 +761,19 @@ async function initializeApp() {
     }
 
     // --- Initialize Application ---
-    console.log('Starting application initialization...');
     try {
-        console.log('Step 1: Loading fabric series...');
         await loadFabricSeries();
-        console.log('Step 2: Loading cost settings...');
         await loadCostSettings();
-        console.log('Step 3: Loading calculations...');
         await loadCalculations();
-        console.log('Step 4: Switching to calculator view...');
         switchView('calculator');
         
         // Auto-focus on width input
         if (widthInput) {
             setTimeout(() => {
-                console.log('Focusing on width input...');
                 widthInput.focus();
             }, 500);
         }
-        console.log('Application initialization completed successfully!');
     } catch (error) {
-        console.error('Uygulama başlatılırken hata:', error);
         showNotification('Uygulama başlatılırken hata oluştu!', 'error');
     }
 }

@@ -160,7 +160,6 @@ function exportData() {
         
         showDesktopNotification('Dışa Aktarma', 'Veritabanı başarıyla dışa aktarıldı!', 'success');
     }).catch(error => {
-        console.error('Dışa aktarma hatası:', error);
         showDesktopNotification('Hata', 'Dışa aktarma sırasında hata oluştu!', 'error');
     });
 }
@@ -259,7 +258,6 @@ function fallbackCopyTextToClipboard(text, message) {
             showDesktopNotification('Kopyalandı', message, 'success');
         }
     } catch (err) {
-        console.error('Kopyalama başarısız:', err);
         showDesktopNotification('Hata', 'Kopyalama başarısız', 'error');
     }
     
@@ -321,7 +319,8 @@ document.addEventListener('contextmenu', (e) => {
 // Initialize Desktop Features
 document.addEventListener('DOMContentLoaded', () => {
     // Detect platform
-    detectPlatform();
+    const platformClass = `platform-${detectPlatform()}`;
+    document.body.classList.add(platformClass);
     
     initDesktopTooltips();
     

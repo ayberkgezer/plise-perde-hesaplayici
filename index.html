@@ -1,244 +1,39 @@
-<!DOC    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data:; connect-src 'self';">"YPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data:;">
-    <title>Perde Hesaplama - Tengra Works</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="src/styles/style.css">
-    <link rel="stylesheet" href="src/styles/cost-analysis.css">
-    <link rel="stylesheet" href="src/styles/about-modal.css">
-    <link rel="stylesheet" href="src/styles/about-page.css">
-    <style>
-        /* Desktop Window Controls */
-        .title-bar {
-            height: 40px;
-            background: var(--glass-bg, rgba(255, 255, 255, 0.9));
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 16px;
-            border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
-            -webkit-app-region: drag;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        /* macOS: Sol tarafta traffic lights için alan bırak */
-        .title-bar.mac-platform {
-            padding-left: 80px;
-        }
-
-        /* Windows/Linux: Normal padding */
-        .title-bar.win-platform {
-            padding-left: 16px;
-        }
-
-        .title-bar-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .app-logo {
-            width: 16px;
-            height: 16px;
-        }
-        
-        .app-title {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-primary, #333);
-        }
-        
-        .title-bar-controls {
-            display: flex;
-            gap: 6px;
-            -webkit-app-region: no-drag;
-        }
-
-        /* macOS'ta custom butonları gizle */
-        .title-bar-controls.mac-platform {
-            display: none;
-        }
-
-        /* Windows/Linux'ta custom butonları göster */
-        .title-bar-controls.win-platform {
-            display: flex;
-        }
-        
-        .control-btn {
-            width: 32px;
-            height: 32px;
-            border: none;
-            background: transparent;
-            color: var(--text-primary, #333);
-            font-size: 16px;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-        
-        .control-btn:hover {
-            background: rgba(0, 0, 0, 0.1);
-        }
-        
-        .control-btn.close:hover {
-            background: #e81123;
-            color: white;
-        }
-        
-        .title-bar-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .app-logo {
-            width: 16px;
-            height: 16px;
-        }
-        
-        .app-title {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-primary, #333);
-        }
-        
-        .title-bar-controls {
-            display: flex;
-            gap: 6px;
-            -webkit-app-region: no-drag;
-        }
-        
-        .control-btn {
-            width: 12px;
-            height: 12px;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: transparent;
-            transition: all 0.2s ease;
-        }
-        
-        .control-btn:hover {
-            color: rgba(0, 0, 0, 0.6);
-        }
-        
-        .control-btn.close {
-            background: #ff5f57;
-        }
-        
-        .control-btn.minimize {
-            background: #ffbd2e;
-        }
-        
-        .control-btn.maximize {
-            background: #28ca42;
-        }
-        
-        /* Status Bar */
-        .status-bar {
-            height: 24px;
-            background: var(--surface-color, #f8f9fa);
-            border-top: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 16px;
-            font-size: 11px;
-            color: var(--text-muted, #666);
-        }
-        
-        .status-left {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .status-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #28ca42;
-        }
-        
-        /* Modern Table Styles */
-        .table-container {
-            max-height: 400px;
-            overflow-y: auto;
-            border-radius: var(--radius-md, 8px);
-            border: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
-            background: var(--surface-color, #fff);
-        }
-        
-        .modern-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-        
-        .modern-table th {
-            background: var(--background-secondary, #f8f9fa);
-            padding: 12px 16px;
-            text-align: left;
-            font-weight: 600;
-            color: var(--text-primary, #333);
-            border-bottom: 2px solid var(--border-color, rgba(0, 0, 0, 0.1));
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        
-        .modern-table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border-light, rgba(0, 0, 0, 0.05));
-            color: var(--text-secondary, #666);
-        }
-        
-        .modern-table tr:hover {
-            background: var(--surface-hover, rgba(0, 0, 0, 0.02));
-        }
-        
-        .table-actions {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .table-actions .modern-btn {
-            padding: 6px 12px;
-            font-size: 12px;
-            min-height: 32px;
-        }
-    </style>
+    <title>Tengra Works</title>
+    <link rel="stylesheet" href="./src/styles/style.css">
+    <link rel="stylesheet" href="./src/styles/cost-analysis.css">
+    <link rel="stylesheet" href="./src/styles/about-modal.css">
+    <link rel="stylesheet" href="./src/styles/about-page.css">
 </head>
-<body>
-    <div class="title-bar">
-                        <div class="title-bar-left">
-            <div class="app-logo">
-                <img src="src/assets/images/icon.png" alt="Perde Hesaplama" style="width: 16px; height: 16px;">
-            </div>
-            <div class="app-title">Tengra Works - Perde Hesaplama</div>
-        </div>
-        <div class="title-bar-controls" id="title-bar-controls">
-            <button class="control-btn minimize" id="minimize-btn">_</button>
-            <button class="control-btn maximize" id="maximize-btn">□</button>
-            <button class="control-btn close" id="close-btn">×</button>
-        </div>
-    </div>
+<body class="">
+    <header class="title-bar">
+      <div class="title-bar-text">Tengra Works - Perde Hesaplama</div>
+      <div class="title-bar-controls">
+        <button
+          id="minimize-btn"
+          class="title-bar-btn"
+        >
+          &#xE921;
+        </button>
+        <button
+          id="max-unmax-btn"
+          class="title-bar-btn"
+        >
+          &#xE922;
+        </button>
+        <button
+          id="close-btn"
+          class="title-bar-btn"
+          style="color: #fff"
+        >
+          &#xE8BB;
+        </button>
+      </div>
+    </header>
     
     <div id="app-container">
         <div id="sidebar">

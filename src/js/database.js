@@ -15,10 +15,8 @@ class DatabaseManager {
                     console.error('Veritabanı bağlantı hatası:', err.message);
                     reject(err);
                 } else {
-                    console.log('SQLite veritabanına bağlandı.');
                     this.initializeTables()
                         .then(() => {
-                            console.log('Veritabanı tabloları hazır.');
                             resolve();
                         })
                         .catch((initErr) => {
@@ -84,7 +82,6 @@ class DatabaseManager {
                         reject(err);
                     } else {
                         completed++;
-                        console.log(`Tablo ${index + 1}/${tableQueries.length} oluşturuldu`);
                         
                         if (completed === tableQueries.length) {
                             // Tablolar oluşturulduktan sonra trigger'ları ekle
@@ -137,7 +134,6 @@ class DatabaseManager {
                     
                     completed++;
                     if (completed === triggerQueries.length) {
-                        console.log('Trigger\'lar oluşturuldu');
                         resolve();
                     }
                 });
@@ -184,32 +180,25 @@ class DatabaseManager {
     // Maliyet ayarlarını başlat
     initializeCostSettings() {
         return new Promise((resolve, reject) => {
-            console.log('initializeCostSettings called');
             this.db.get("SELECT COUNT(*) as count FROM cost_settings", (err, row) => {
                 if (err) {
-                    console.error('initializeCostSettings count error:', err);
                     reject(err);
                     return;
                 }
 
-                console.log('cost_settings count:', row.count);
                 if (row.count === 0) {
-                    console.log('No cost_settings found, inserting default values...');
                     this.db.run(
                         "INSERT INTO cost_settings (fixed_cost_per_unit, aluminium_cost_per_cm) VALUES (?, ?)",
                         [25, 0.8],
                         (err) => {
                             if (err) {
-                                console.error('initializeCostSettings insert error:', err);
                                 reject(err);
                             } else {
-                                console.log('Default cost_settings inserted successfully');
                                 resolve();
                             }
                         }
                     );
                 } else {
-                    console.log('cost_settings already exist, skipping initialization');
                     resolve();
                 }
             });
@@ -264,15 +253,12 @@ class DatabaseManager {
     // Maliyet ayarları yönetimi
     getCostSettings() {
         return new Promise((resolve, reject) => {
-            console.log('getCostSettings called');
             this.db.get("SELECT * FROM cost_settings ORDER BY id DESC LIMIT 1", (err, row) => {
                 if (err) {
                     console.error('getCostSettings error:', err);
                     reject(err);
                 } else {
-                    console.log('getCostSettings result:', row);
                     const result = row || { fixed_cost_per_unit: 25, aluminium_cost_per_cm: 0.8 };
-                    console.log('getCostSettings returning:', result);
                     resolve(result);
                 }
             });
@@ -281,7 +267,6 @@ class DatabaseManager {
 
     updateCostSettings(fixedCostPerUnit, aluminiumCostPerCm) {
         return new Promise((resolve, reject) => {
-            console.log('updateCostSettings called with:', { fixedCostPerUnit, aluminiumCostPerCm });
             
             const db = this.db; // Database reference'ını sakla
             
@@ -295,7 +280,6 @@ class DatabaseManager {
                 
                 if (row) {
                     // Mevcut kaydı güncelle
-                    console.log('Updating existing record with ID:', row.id);
                     db.run(
                         "UPDATE cost_settings SET fixed_cost_per_unit = ?, aluminium_cost_per_cm = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
                         [fixedCostPerUnit, aluminiumCostPerCm, row.id],
@@ -304,14 +288,12 @@ class DatabaseManager {
                                 console.error('UPDATE error:', updateErr);
                                 reject(updateErr);
                             } else {
-                                console.log('UPDATE successful, changes:', this.changes);
                                 resolve();
                             }
                         }
                     );
                 } else {
                     // Yeni kayıt ekle
-                    console.log('No existing record found, inserting new one...');
                     db.run(
                         "INSERT INTO cost_settings (fixed_cost_per_unit, aluminium_cost_per_cm, created_at, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
                         [fixedCostPerUnit, aluminiumCostPerCm],
@@ -320,7 +302,6 @@ class DatabaseManager {
                                 console.error('INSERT error:', insertErr);
                                 reject(insertErr);
                             } else {
-                                console.log('INSERT successful, lastID:', this.lastID);
                                 resolve();
                             }
                         }
@@ -414,7 +395,6 @@ class DatabaseManager {
                         console.error('Veritabanı kapatma hatası:', err.message);
                         reject(err);
                     } else {
-                        console.log('Veritabanı bağlantısı kapatıldı.');
                         resolve();
                     }
                 });

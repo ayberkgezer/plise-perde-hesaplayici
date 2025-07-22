@@ -29,22 +29,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   clearCalculations: () => ipcRenderer.invoke('db-clear-calculations'),
   getCalculationStats: () => ipcRenderer.invoke('db-get-calculation-stats'),
   
-  // File system operations (deprecated - kept for compatibility)
-  readFile: (filePath) => {
-    console.warn('readFile is deprecated. Using SQLite database instead.');
-    return Promise.resolve(null);
-  },
-  
-  writeFile: (filePath, data) => {
-    console.warn('writeFile is deprecated. Using SQLite database instead.');
-    return Promise.resolve(false);
-  },
-  
-  fileExists: (filePath) => {
-    console.warn('fileExists is deprecated. Using SQLite database instead.');
-    return Promise.resolve(false);
-  },
-  
   // Path utilities
   resolvePath: (...pathSegments) => path.resolve(...pathSegments),
   joinPath: (...pathSegments) => path.join(...pathSegments),

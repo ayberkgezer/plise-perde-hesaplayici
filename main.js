@@ -70,11 +70,6 @@ function createMainWindow() {
   // Ana sayfa yükle
   mainWindow.loadFile('index.html');
 
-  // Debug için developer tools'u aç (geliştirme aşamasında)
-  if (process.env.NODE_ENV === 'development') {
-    mainWindow.webContents.openDevTools();
-  }
-
   // Pencere hazır olduğunda göster
   mainWindow.once('ready-to-show', () => {
     if (splashWindow) {
@@ -291,7 +286,6 @@ ipcMain.handle('db-get-fabric-series', async () => {
   try {
     return await database.getFabricSeries();
   } catch (error) {
-    console.error('Kumaş serileri getirme hatası:', error);
     return [];
   }
 });
@@ -300,7 +294,6 @@ ipcMain.handle('db-add-fabric-series', async (event, name, price, cost) => {
   try {
     return await database.addFabricSeries(name, price, cost);
   } catch (error) {
-    console.error('Kumaş serisi ekleme hatası:', error);
     throw error;
   }
 });
@@ -309,7 +302,6 @@ ipcMain.handle('db-update-fabric-series', async (event, id, name, price, cost) =
   try {
     return await database.updateFabricSeries(id, name, price, cost);
   } catch (error) {
-    console.error('Kumaş serisi güncelleme hatası:', error);
     throw error;
   }
 });
@@ -318,7 +310,6 @@ ipcMain.handle('db-delete-fabric-series', async (event, id) => {
   try {
     return await database.deleteFabricSeries(id);
   } catch (error) {
-    console.error('Kumaş serisi silme hatası:', error);
     throw error;
   }
 });
@@ -327,7 +318,6 @@ ipcMain.handle('db-get-cost-settings', async () => {
   try {
     return await database.getCostSettings();
   } catch (error) {
-    console.error('Maliyet ayarları getirme hatası:', error);
     return { fixed_cost_per_unit: 25, aluminium_cost_per_cm: 0.8 };
   }
 });
@@ -336,17 +326,14 @@ ipcMain.handle('db-update-cost-settings', async (event, fixedCostPerUnit, alumin
   try {
     return await database.updateCostSettings(fixedCostPerUnit, aluminiumCostPerCm);
   } catch (error) {
-    console.error('Maliyet ayarları güncelleme hatası:', error);
     throw error;
   }
 });
 
 ipcMain.handle('db-add-calculation', async (event, calculation) => {
   try {
-    const { fabricSeriesId, width, height, quantity, unitPrice, totalPrice, unitCost, totalCost, profit } = calculation;
-    return await database.addCalculation(fabricSeriesId, width, height, quantity, unitPrice, totalPrice, unitCost, totalCost, profit);
+    return await database.addCalculation(calculation);
   } catch (error) {
-    console.error('Hesaplama ekleme hatası:', error);
     throw error;
   }
 });
@@ -355,7 +342,6 @@ ipcMain.handle('db-get-calculations', async (event, limit = null) => {
   try {
     return await database.getCalculations(limit);
   } catch (error) {
-    console.error('Hesaplamaları getirme hatası:', error);
     return [];
   }
 });
@@ -364,7 +350,6 @@ ipcMain.handle('db-delete-calculation', async (event, id) => {
   try {
     return await database.deleteCalculation(id);
   } catch (error) {
-    console.error('Hesaplama silme hatası:', error);
     throw error;
   }
 });
@@ -373,7 +358,6 @@ ipcMain.handle('db-clear-calculations', async () => {
   try {
     return await database.clearAllCalculations();
   } catch (error) {
-    console.error('Hesaplamaları temizleme hatası:', error);
     throw error;
   }
 });
@@ -382,7 +366,6 @@ ipcMain.handle('db-get-calculation-stats', async () => {
   try {
     return await database.getCalculationStats();
   } catch (error) {
-    console.error('Hesaplama istatistikleri getirme hatası:', error);
     return {
       total_calculations: 0,
       total_revenue: 0,
