@@ -96,3 +96,28 @@ jobs:
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Her build için artifacts'ı göster (opsiyonel)
+  artifacts-summary:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Download macOS artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: macos-build
+        path: ./build-files/
+    
+    - name: Download Windows artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: windows-build
+        path: ./build-files/
+    
+    - name: List build files
+      run: |
+        echo "Build files created:"
+        ls -la ./build-files/
+        echo "Files are available as artifacts in this workflow run."
