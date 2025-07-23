@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="./src/styles/cost-analysis.css">
     <link rel="stylesheet" href="./src/styles/about-modal.css">
     <link rel="stylesheet" href="./src/styles/about-page.css">
+    <link rel="stylesheet" href="./src/styles/order-modal.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body class="">
     <header class="title-bar">
@@ -119,6 +122,9 @@
                     <div class="results-header">
                         <h2 class="results-title"><span class="icon icon-list"></span> Hesaplanan Ürünler</h2>
                         <div class="results-actions">
+                            <button id="orderFormBtn" class="primary modern-btn">
+                                <span class="icon icon-save"></span> Fiş Çıkar
+                            </button>
                             <button id="clearAllBtn" class="danger modern-btn">
                                 <span class="icon icon-trash"></span> Temizle
                             </button>
@@ -524,7 +530,57 @@
         </div>
     </div>
 
+    <!-- Sipariş Formu Modal -->
+    <div id="orderModal" class="order-modal">
+        <div class="order-modal-content">
+            <div class="order-modal-header">
+                <h3><span class="icon">📋</span> Müşteri Bilgileri</h3>
+                <button id="closeOrderModal" class="close-btn">&times;</button>
+            </div>
+            <form id="orderForm" class="order-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="customerName">Ad Soyad *</label>
+                        <input type="text" id="customerName" name="customerName" required class="modern-input" placeholder="Müşteri adı ve soyadı">
+                    </div>
+                    <div class="form-group">
+                        <label for="customerPhone">Telefon *</label>
+                        <input type="tel" id="customerPhone" name="customerPhone" required class="modern-input" placeholder="0555 123 45 67">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="customerEmail">E-posta</label>
+                        <input type="email" id="customerEmail" name="customerEmail" class="modern-input" placeholder="ornek@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="orderDate">Sipariş Tarihi</label>
+                        <input type="date" id="orderDate" name="orderDate" class="modern-input">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="customerAddress">Adres</label>
+                    <textarea id="customerAddress" name="customerAddress" class="modern-textarea" rows="3" placeholder="Müşteri adresi (opsiyonel)"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="orderNotes">Notlar</label>
+                    <textarea id="orderNotes" name="orderNotes" class="modern-textarea" rows="2" placeholder="Sipariş notları (opsiyonel)"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="cancelOrder" class="modern-btn">İptal</button>
+                    <button type="button" id="generatePDF" class="modern-btn success">
+                        <span class="icon">📄</span> PDF Kaydet
+                    </button>
+                    <button type="button" id="printOrder" class="modern-btn primary">
+                        <span class="icon">🖨️</span> Yazdır
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="src/js/desktop-controls.js"></script>
+    <script src="src/js/order-manager.js"></script>
     <script src="renderer.js"></script>
 </body>
 </html>
