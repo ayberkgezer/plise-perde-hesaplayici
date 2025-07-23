@@ -29,6 +29,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   clearCalculations: () => ipcRenderer.invoke('db-clear-calculations'),
   getCalculationStats: () => ipcRenderer.invoke('db-get-calculation-stats'),
   
+  // Database operations - Company Info
+  getCompanyInfo: () => ipcRenderer.invoke('db-get-company-info'),
+  addCompanyInfo: (companyData) => ipcRenderer.invoke('db-add-company-info', companyData),
+  updateCompanyInfo: (id, companyData) => ipcRenderer.invoke('db-update-company-info', id, companyData),
+  getAllCompanies: () => ipcRenderer.invoke('db-get-all-companies'),
+  setActiveCompany: (id) => ipcRenderer.invoke('db-set-active-company', id),
+  deleteCompany: (id) => ipcRenderer.invoke('db-delete-company', id),
+  
   // Path utilities
   resolvePath: (...pathSegments) => path.resolve(...pathSegments),
   joinPath: (...pathSegments) => path.join(...pathSegments),

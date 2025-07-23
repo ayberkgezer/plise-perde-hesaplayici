@@ -129,6 +129,22 @@ class DatabaseManager {
                     profit REAL NOT NULL,
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (fabric_series_id) REFERENCES fabric_series (id)
+                )`,
+                
+                // Firma bilgileri tablosu
+                                // Firma bilgileri tablosu
+                `CREATE TABLE IF NOT EXISTS company_info (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    company_name TEXT NOT NULL,
+                    contact_person TEXT,
+                    phone TEXT,
+                    email TEXT,
+                    address TEXT,
+                    website TEXT,
+                    tax_number TEXT,
+                    is_active BOOLEAN DEFAULT 1,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 )`
             ];
 
@@ -175,6 +191,13 @@ class DatabaseManager {
                  FOR EACH ROW
                  BEGIN
                      UPDATE cost_settings SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+                 END`,
+                 
+                `CREATE TRIGGER IF NOT EXISTS update_company_info_timestamp 
+                 AFTER UPDATE ON company_info
+                 FOR EACH ROW
+                 BEGIN
+                     UPDATE company_info SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
                  END`
             ];
 
@@ -445,6 +468,109 @@ class DatabaseManager {
                     total_profit: 0,
                     average_profit: 0
                 });
+            });
+        });
+    }
+
+    // Firma bilgileri yönetimi
+    getCompanyInfo() {
+        return new Promise((resolve, reject) => {
+            this.db.get("SELECT * FROM company_info WHERE is_active = 1 ORDER BY id DESC LIMIT 1", (err, row) => {
+                if (err) {
+                    console.error('getCompanyInfo error:', err);
+                    reject(err);
+                } else {
+                    resolve(row || null);
+                }
+            });
+        });
+    }
+
+    addCompanyInfo(companyData) {
+        return new Promise((resolve, reject) => {
+            const { company_name, contact_person, phone, email, address, website, tax_number } = companyData;
+            
+            // Önce mevcut aktif firmaları pasif yap
+            this.db.run("UPDATE company_info SET is_active = 0", (err) => {
+                if (err) {
+                    console.error('Update existing companies error:', err);
+                    reject(err);
+                    return;
+                }
+                
+                // Yeni firmayı ekle
+                this.db.run(
+                    `INSERT INTO company_info 
+                     (company_name, contact_person, phone, email, address, website, tax_number, is_active) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, 1)`,
+                    [company_name, contact_person, phone, email, address, website, tax_number],
+                    function(err) {
+                        if (err) {
+                            console.error('Insert company error:', err);
+                            reject(err);
+                        } else {
+                            resolve({ id: this.lastID, ...companyData });
+                        }
+                    }
+                );
+            });
+        });
+    }
+
+    updateCompanyInfo(id, companyData) {
+        return new Promise((resolve, reject) => {
+            const { company_name, contact_person, phone, email, address, website, tax_number } = companyData;
+            
+            this.db.run(
+                `UPDATE company_info 
+                 SET company_name = ?, contact_person = ?, phone = ?, email = ?, 
+                     address = ?, website = ?, tax_number = ?, updated_at = CURRENT_TIMESTAMP 
+                 WHERE id = ?`,
+                [company_name, contact_person, phone, email, address, website, tax_number, id],
+                (err) => {
+                    if (err) {
+                        console.error('Update company error:', err);
+                        reject(err);
+                    } else {
+                        resolve({ id, ...companyData });
+                    }
+                }
+            );
+        });
+    }
+
+    getAllCompanies() {
+        return new Promise((resolve, reject) => {
+            this.db.all("SELECT * FROM company_info ORDER BY created_at DESC", (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows);
+            });
+        });
+    }
+
+    setActiveCompany(id) {
+        return new Promise((resolve, reject) => {
+            // Önce tüm firmaları pasif yap
+            this.db.run("UPDATE company_info SET is_active = 0", (err) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                
+                // Seçili firmayı aktif yap
+                this.db.run("UPDATE company_info SET is_active = 1 WHERE id = ?", [id], (err) => {
+                    if (err) reject(err);
+                    else resolve();
+                });
+            });
+        });
+    }
+
+    deleteCompany(id) {
+        return new Promise((resolve, reject) => {
+            this.db.run("DELETE FROM company_info WHERE id = ?", [id], (err) => {
+                if (err) reject(err);
+                else resolve();
             });
         });
     }

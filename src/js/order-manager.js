@@ -5,6 +5,7 @@ class OrderManager {
         this.orderModal = null;
         this.orderForm = null;
         this.calculations = [];
+        this.companyInfo = null;
         this.init();
     }
 
@@ -14,6 +15,7 @@ class OrderManager {
             this.orderForm = document.getElementById('orderForm');
             this.setupEventListeners();
             this.setDefaultDate();
+            this.loadCompanyInfo();
         });
     }
 
@@ -63,6 +65,15 @@ class OrderManager {
                 e.preventDefault();
                 this.validateForm();
             });
+        }
+    }
+
+    async loadCompanyInfo() {
+        try {
+            this.companyInfo = await window.electronAPI.getCompanyInfo();
+        } catch (error) {
+            console.error('Firma bilgisi yüklenirken hata:', error);
+            this.companyInfo = null;
         }
     }
 
@@ -184,6 +195,9 @@ class OrderManager {
         if (!this.validateForm()) return;
 
         try {
+            // Firma bilgilerini yeniden yükle
+            await this.loadCompanyInfo();
+            
             const customerData = this.getCustomerData();
             const orderNumber = this.generateOrderNumber();
             
@@ -208,39 +222,73 @@ class OrderManager {
     }
 
     createPDFContent(pdf, customerData, orderNumber) {
+        // UTF-8 desteği için font ayarları
+        try {
+            pdf.setFont('helvetica', 'normal');
+        } catch (e) {
+            console.warn('Font ayarı başarısız, varsayılan font kullanılıyor');
+        }
+        
         // PDF Başlığı
         pdf.setFontSize(20);
-        pdf.setFont(undefined, 'bold');
-        pdf.text('SİPARİŞ FİŞİ', 105, 20, { align: 'center' });
+        pdf.setFont('helvetica', 'bold');
         
-        // Logo alanı (opsiyonel)
+        // Türkçe karakterleri encode et
+        const title = 'SIPARIS FISI';
+        pdf.text(title, 105, 20, { align: 'center' });
+        
+        // Firma Bilgileri
         pdf.setFontSize(12);
-        pdf.setFont(undefined, 'normal');
-        pdf.text('TENGRA WORKS', 105, 30, { align: 'center' });
-        pdf.text('Plise Perde Sistemleri', 105, 36, { align: 'center' });
+        pdf.setFont('helvetica', 'normal');
+        
+        if (this.companyInfo) {
+            pdf.text(this.getSafeText(this.companyInfo.company_name), 105, 30, { align: 'center' });
+            
+            if (this.companyInfo.address) {
+                pdf.setFontSize(10);
+                pdf.text(this.getSafeText(this.companyInfo.address), 105, 36, { align: 'center' });
+            }
+            
+            let infoLine = '';
+            if (this.companyInfo.phone) infoLine += `Tel: ${this.companyInfo.phone}`;
+            if (this.companyInfo.email) {
+                if (infoLine) infoLine += ' | ';
+                infoLine += `E-posta: ${this.companyInfo.email}`;
+            }
+            if (this.companyInfo.website) {
+                if (infoLine) infoLine += ' | ';
+                infoLine += `Web: ${this.companyInfo.website}`;
+            }
+            
+            if (infoLine) {
+                pdf.text(this.getSafeText(infoLine), 105, 42, { align: 'center' });
+            }
+        } else {
+            pdf.text('TENGRA WORKS', 105, 30, { align: 'center' });
+        }
         
         // Çizgi
-        pdf.line(20, 42, 190, 42);
+        pdf.line(20, 48, 190, 48);
         
         // Sipariş Bilgileri
         pdf.setFontSize(11);
-        pdf.setFont(undefined, 'bold');
-        pdf.text('Sipariş No:', 20, 52);
-        pdf.setFont(undefined, 'normal');
-        pdf.text(orderNumber, 50, 52);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Siparis No:', 20, 58);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(orderNumber, 50, 58);
         
-        pdf.setFont(undefined, 'bold');
-        pdf.text('Tarih:', 130, 52);
-        pdf.setFont(undefined, 'normal');
-        pdf.text(customerData.orderDate, 150, 52);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Tarih:', 130, 58);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(customerData.orderDate, 150, 58);
         
         // Müşteri Bilgileri
-        pdf.setFont(undefined, 'bold');
-        pdf.text('MÜŞTERİ BİLGİLERİ', 20, 65);
-        pdf.line(20, 67, 100, 67);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('MUSTERI BILGILERI', 20, 71);
+        pdf.line(20, 73, 100, 73);
         
-        pdf.setFont(undefined, 'normal');
-        let yPos = 75;
+        pdf.setFont('helvetica', 'normal');
+        let yPos = 81;
         pdf.text(`Ad Soyad: ${customerData.name}`, 20, yPos);
         yPos += 6;
         pdf.text(`Telefon: ${customerData.phone}`, 20, yPos);
@@ -260,14 +308,14 @@ class OrderManager {
         // Sipariş Detayları Tablosu
         yPos += 10;
         pdf.setFont(undefined, 'bold');
-        pdf.text('SİPARİŞ DETAYLARI', 20, yPos);
+        pdf.text('SIPARIS DETAYLARI', 20, yPos);
         pdf.line(20, yPos + 2, 120, yPos + 2);
         
         yPos += 10;
         
         // Tablo başlıkları
         pdf.setFontSize(9);
-        const headers = ['Adet', 'Genişlik', 'Yükseklik', 'Alan (m²)', 'Kumaş', 'Fiyat'];
+        const headers = ['Adet', 'Genislik', 'Yukseklik', 'Alan (m²)', 'Kumas', 'Fiyat'];
         const colWidths = [20, 25, 25, 25, 40, 30];
         let xPos = 20;
         
@@ -326,14 +374,17 @@ class OrderManager {
         // Footer
         pdf.setFontSize(8);
         pdf.setFont(undefined, 'normal');
-        pdf.text('Bu sipariş fişi Tengra Works Plise Perde Hesaplayıcı ile oluşturulmuştur.', 105, 280, { align: 'center' });
-        pdf.text('İletişim: tengraworks.com', 105, 285, { align: 'center' });
+        pdf.text('Bu siparis fisi Tengra Works Plise Perde Hesaplayici ile olusturulmustur.', 105, 280, { align: 'center' });
+        pdf.text('Iletisim: tengraworks.com', 105, 285, { align: 'center' });
     }
 
     async printOrder() {
         if (!this.validateForm()) return;
 
         try {
+            // Firma bilgilerini yeniden yükle
+            await this.loadCompanyInfo();
+            
             const customerData = this.getCustomerData();
             const orderNumber = this.generateOrderNumber();
             
@@ -510,9 +561,22 @@ class OrderManager {
             <div class="order-receipt">
                 <div class="receipt-header">
                     <h1>SİPARİŞ FİŞİ</h1>
+                    ${this.companyInfo ? `
+                    <div class="company-info">
+                        <div style="font-size: 16px; font-weight: bold; margin-bottom: 5px;">${this.companyInfo.company_name}</div>
+                        ${this.companyInfo.address ? `<p class="company-info">${this.companyInfo.address}</p>` : ''}
+                        <p class="company-info">
+                            ${this.companyInfo.phone ? `Tel: ${this.companyInfo.phone}` : ''}
+                            ${this.companyInfo.phone && this.companyInfo.email ? ' | ' : ''}
+                            ${this.companyInfo.email ? `E-posta: ${this.companyInfo.email}` : ''}
+                        </p>
+                        ${this.companyInfo.website ? `<p class="company-info">Web: ${this.companyInfo.website}</p>` : ''}
+                        ${this.companyInfo.tax_number ? `<p class="company-info">Vergi No: ${this.companyInfo.tax_number}</p>` : ''}
+                    </div>
+                    ` : `
                     <p class="company-info">TENGRA WORKS</p>
-                    <p class="company-info">Plise Perde Sistemleri</p>
                     <p class="company-info">tengraworks.com</p>
+                    `}
                 </div>
 
                 <div class="receipt-info">
@@ -551,7 +615,7 @@ class OrderManager {
                         </div>
                         <div class="info-item">
                             <span class="info-label">Durum:</span>
-                            <span>Onay Bekliyor</span>
+                            <span>Onaylandı</span>
                         </div>
                     </div>
                 </div>
@@ -644,6 +708,25 @@ class OrderManager {
                 }
             }, 300);
         }, 3000);
+    }
+
+    // Türkçe karakterleri PDF için güvenli hale getir
+    encodeText(text) {
+        if (!text) return '';
+        
+        // Türkçe karakterleri ASCII karşılıklarıyla değiştir
+        return text
+            .replace(/ç/g, 'c').replace(/Ç/g, 'C')
+            .replace(/ğ/g, 'g').replace(/Ğ/g, 'G')
+            .replace(/ı/g, 'i').replace(/İ/g, 'I')
+            .replace(/ö/g, 'o').replace(/Ö/g, 'O')
+            .replace(/ş/g, 's').replace(/Ş/g, 'S')
+            .replace(/ü/g, 'u').replace(/Ü/g, 'U');
+    }
+
+    // Güvenli metin dönüştürücü (PDF için)
+    getSafeText(text) {
+        return this.encodeText(text);
     }
 }
 
