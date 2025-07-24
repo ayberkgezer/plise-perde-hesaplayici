@@ -182,12 +182,16 @@ body {
     background: transparent;
     color: #fff;
     font-size: 16px;
-    width: 40px;
+    width: 46px;
     height: 32px;
     line-height: 32px;
     text-align: center;
     cursor: pointer;
     transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-app-region: no-drag;
 }
 
 .title-bar-btn:hover {
@@ -1305,6 +1309,60 @@ body {
 
 .platform-macos .title-bar-controls {
     display: none;
+}
+
+/* Windows Specific Styles */
+.platform-windows .title-bar {
+    justify-content: space-between;
+}
+
+.platform-windows .title-bar-controls {
+    display: flex;
+    align-items: center;
+    -webkit-app-region: no-drag;
+}
+
+.platform-windows .title-bar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: #fff;
+    font-size: 16px;
+    width: 46px;
+    height: 32px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    -webkit-app-region: no-drag;
+    font-family: 'Segoe MDL2 Assets', 'Segoe UI Symbol', sans-serif;
+}
+
+.platform-windows .title-bar-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.platform-windows #close-btn:hover {
+    background-color: #e81123 !important;
+    color: #fff;
+}
+
+/* Ensure title bar buttons are always visible on Windows */
+.platform-windows .title-bar-btn {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Default title bar controls visibility (before platform detection) */
+body:not(.platform-macos) .title-bar-controls {
+    display: flex !important;
+    visibility: visible !important;
+}
+
+body:not(.platform-macos) .title-bar-btn {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 /* Status Bar - Yeni stil */

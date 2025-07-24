@@ -330,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add desktop control event listeners (only for Windows/Linux)
     if (!isMac) {
         const minimizeBtn = document.getElementById('minimize-btn');
-        const maximizeBtn = document.getElementById('maximize-btn');
+        const maximizeBtn = document.getElementById('max-unmax-btn'); // Fixed ID to match HTML
         const closeBtn = document.getElementById('close-btn');
         
         if (minimizeBtn) {

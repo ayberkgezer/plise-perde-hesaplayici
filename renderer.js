@@ -16,7 +16,7 @@ async function initializeApp() {
     
     // Platform Detection - Title bar'ı platform bazında ayarla
     const titleBar = document.querySelector('.title-bar');
-    const titleBarControls = document.getElementById('title-bar-controls');
+    const titleBarControls = document.querySelector('.title-bar-controls');
     const isMac = window.electronAPI?.platform === 'darwin' || navigator.platform.toUpperCase().indexOf('MAC') >= 0;
     
     // Wait for electronAPI to be available if not yet ready
@@ -33,12 +33,21 @@ async function initializeApp() {
         });
     }
 
+    // Platform-specific title bar configuration
+    // Note: desktop-controls.js already adds platform-* classes to body
     if (isMac) {
         titleBar?.classList.add('mac-platform');
         titleBarControls?.classList.add('mac-platform');
     } else {
+        // Windows/Linux - ensure title bar controls are visible
         titleBar?.classList.add('win-platform');
         titleBarControls?.classList.add('win-platform');
+        
+        // Explicitly ensure controls are visible on Windows
+        if (titleBarControls) {
+            titleBarControls.style.display = 'flex';
+            titleBarControls.style.visibility = 'visible';
+        }
     }    // --- Element Referansları ---
     
     // DOM'un tam hazır olmasını bekle
