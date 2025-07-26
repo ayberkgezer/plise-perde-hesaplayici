@@ -58,6 +58,7 @@ function createMainWindow() {
     show: false,
     center: true,
     title: 'Perde Hesaplama',
+    backgroundThrottling: false, // Arka planda yavaşlamayı önle
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -214,6 +215,9 @@ function createMenu() {
 }
 
 // App event handlers
+// Donanım hızlandırmayı devre dışı bırakarak render hatalarını önle
+app.disableHardwareAcceleration();
+
 app.whenReady().then(async () => {
   // Uygulama adını ayarla (dock için)
   app.setName('Perde Hesaplama');

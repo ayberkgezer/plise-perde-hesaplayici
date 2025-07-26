@@ -62,7 +62,7 @@ async function initializeApp() {
     const quantityInput = document.getElementById('quantity');
 
     if (!fabricTypeSelect) {
-        showNotification('Kritik form alanları bulunamadı!', 'error');
+        console.error('Kritik form alanları bulunamadı!');
     }
 
     // Navigation Elements
@@ -142,7 +142,7 @@ async function initializeApp() {
             renderFabricDropdown();
             renderFabricManagementTable();
         } catch (error) {
-            showNotification('Kumaş serileri yüklenemedi!', 'error');
+
         }
     }
 
@@ -166,7 +166,7 @@ async function initializeApp() {
             
             renderCostSettingsTable();
         } catch (error) {
-            showNotification('Maliyet ayarları yüklenemedi!', 'error');
+
         }
     }
 
@@ -373,7 +373,7 @@ async function initializeApp() {
     // --- Calculation Functions ---
     async function performCalculation() {
         if (!fabricTypeSelect || !widthInput || !heightInput || !quantityInput) {
-            showNotification('Gerekli form alanları bulunamadı!', 'error');
+
             return;
         }
 
@@ -383,13 +383,13 @@ async function initializeApp() {
         const quantity = parseInt(quantityInput.value);
 
         if (!fabricId || isNaN(width) || isNaN(height) || isNaN(quantity)) {
-            showNotification('Lütfen tüm alanları doğru şekilde doldurun!', 'error');
+
             return;
         }
 
         const selectedFabric = fabricSeries.find(f => f.id === fabricId);
         if (!selectedFabric) {
-            showNotification('Geçerli bir kumaş seçin!', 'error');
+
             return;
         }
 
@@ -451,7 +451,7 @@ async function initializeApp() {
                 }
             }, 100);
             
-            showNotification('Hesaplama başarıyla eklendi!', 'success');
+
             
             // Form alanlarını temizle ve width input'a odaklan - Windows uyumlu
             widthInput.value = '';
@@ -483,14 +483,14 @@ async function initializeApp() {
             }, 200);
 
         } catch (error) {
-            showNotification('Hesaplama eklenirken hata oluştu!', 'error');
+
         }
     }
 
     // --- Cost Analysis Functions ---
     async function calculateCostAnalysis() {
         if (calculations.length === 0) {
-            showNotification('Hesaplama yapılmamış! Önce hesaplama ekleyin.', 'warning');
+
             return;
         }
 
@@ -527,9 +527,9 @@ async function initializeApp() {
                 });
             }, 100);
             
-            showNotification('Maliyet analizi hesaplandı!', 'success');
+
         } catch (error) {
-            showNotification('Maliyet analizi hesaplanırken hata oluştu!', 'error');
+
         }
     }
 
@@ -585,14 +585,18 @@ async function initializeApp() {
         // Maliyet analizi bölümünü gizle
         if (costAnalysisDiv) costAnalysisDiv.style.display = 'none';
         
-        showNotification('Maliyet analizi temizlendi!', 'success');
+
     }
 
     async function clearAllCalculations() {
         // Tüm hesaplamaları temizle
         calculations = [];
         renderCalculationResult();
-        renderCostAnalysis();
+
+        // Maliyet analizi bölümü varsa ve görünürse temizle
+        if (costAnalysisDiv && costAnalysisDiv.style.display !== 'none') {
+            renderCostAnalysis();
+        }
         
         // Tüm totalleri sıfırla
         if (totalRevenueEl) totalRevenueEl.textContent = '💸 Toplam Satış: 0 TL';
@@ -604,20 +608,18 @@ async function initializeApp() {
         if (costAnalysisDiv) costAnalysisDiv.style.display = 'none';
         
         calculationCount = 0;
-        showNotification('Tüm hesaplamalar temizlendi!', 'success');
+
     }
 
     // Hafızadan hesaplama silme fonksiyonu
     window.removeCalculationFromMemory = function(index) {
-        if (confirm('Bu hesaplamayı silmek istediğinizden emin misiniz?')) {
-            calculations.splice(index, 1);
-            renderCalculationResult();
-            // Eğer maliyet analizi açıksa onu da güncelle
-            if (costAnalysisDiv && costAnalysisDiv.style.display !== 'none') {
-                renderCostAnalysis();
-            }
-            showNotification('Hesaplama silindi!', 'success');
+        calculations.splice(index, 1);
+        renderCalculationResult();
+        // Eğer maliyet analizi açıksa onu da güncelle
+        if (costAnalysisDiv && costAnalysisDiv.style.display !== 'none') {
+            renderCostAnalysis();
         }
+
     };
 
     // --- Global Functions (called from HTML) ---
@@ -635,14 +637,12 @@ async function initializeApp() {
     };
 
     window.deleteFabric = async function(id) {
-        if (confirm('Bu kumaş serisini silmek istediğinizden emin misiniz?')) {
-            try {
-                await window.electronAPI.deleteFabricSeries(id);
-                await loadFabricSeries();
-                showNotification('Kumaş serisi başarıyla silindi!', 'success');
-            } catch (error) {
-                showNotification('Kumaş serisi silinirken hata oluştu!', 'error');
-            }
+        try {
+            await window.electronAPI.deleteFabricSeries(id);
+            await loadFabricSeries();
+
+        } catch (error) {
+
         }
     };
 
@@ -666,29 +666,9 @@ async function initializeApp() {
             fixedCostPerUnitInput.focus();
             fixedCostPerUnitInput.select();
         }
-        
-        showNotification('Maliyet ayarlarını düzenleyebilirsiniz', 'info');
     };
 
-    // --- Notification System ---
-    function showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.className = `notification notification-${type}`;
-        notification.innerHTML = `
-            <span class="notification-icon">${type === 'success' ? '✓' : type === 'error' ? '✗' : 'i'}</span>
-            <span class="notification-message">${message}</span>
-            <button class="notification-close" onclick="this.parentElement.remove()">×</button>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => notification.classList.add('show'), 100);
-        setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }
-    
+
     // --- Modal Functions ---
     function toggleModal(modalId, show) {
         const modal = document.getElementById(modalId);
@@ -716,9 +696,7 @@ async function initializeApp() {
     // Clear All Calculations
     if (clearAllBtn) {
         clearAllBtn.addEventListener('click', async () => {
-            if (confirm('Tüm hesaplamaları silmek istediğinizden emin misiniz?')) {
-                await clearAllCalculations();
-            }
+            await clearAllCalculations();
         });
     }
 
@@ -737,7 +715,7 @@ async function initializeApp() {
             const cost = parseFloat(fabricCostInput.value);
 
             if (!name || isNaN(price) || isNaN(cost)) {
-                showNotification('Lütfen tüm alanları doğru şekilde doldurun!', 'error');
+
                 return;
             }
 
@@ -745,11 +723,11 @@ async function initializeApp() {
                 if (editingFabricId) {
                     // Güncelleme
                     await window.electronAPI.updateFabricSeries(editingFabricId, name, price, cost);
-                    showNotification('Kumaş serisi başarıyla güncellendi!', 'success');
+
                 } else {
                     // Yeni ekleme
                     await window.electronAPI.addFabricSeries(name, price, cost);
-                    showNotification('Kumaş serisi başarıyla eklendi!', 'success');
+
                 }
 
                 await loadFabricSeries();
@@ -765,7 +743,7 @@ async function initializeApp() {
                     }
                 }, 500); // Süreyi artırdık
             } catch (error) {
-                showNotification('Kumaş serisi kaydedilirken hata oluştu!', 'error');
+
             }
         });
     }
@@ -783,7 +761,7 @@ async function initializeApp() {
             const pliseMultiplier = parseFloat(pliseCuttingMultiplierInput.value);
 
             if (isNaN(fixedCost) || isNaN(aluminiumCost) || isNaN(pliseMultiplier)) {
-                showNotification('Lütfen geçerli değerler girin!', 'error');
+
                 return;
             }
 
@@ -793,7 +771,7 @@ async function initializeApp() {
                 // Maliyet ayarlarını güncelle
                 await loadCostSettings();
                 
-                showNotification('Maliyet ayarları başarıyla kaydedildi!', 'success');
+
                 
                 // Input alanlarını tekrar odaklanabilir hale getir
                 scheduleInputFix();
@@ -806,7 +784,7 @@ async function initializeApp() {
                     }
                 }, 500); // Süreyi artırdık
             } catch (error) {
-                showNotification('Maliyet ayarları kaydedilirken hata oluştu!', 'error');
+
             }
         });
     }
@@ -911,7 +889,7 @@ async function initializeApp() {
         a.download = `plise-perde-hesaplamalari-${new Date().toISOString().split('T')[0]}.json`;
         a.click();
         
-        showNotification('Veriler başarıyla dışa aktarıldı!', 'success');
+
     }
 
     // --- Initialize Application ---
@@ -928,7 +906,7 @@ async function initializeApp() {
             }, 800);
         }
     } catch (error) {
-        showNotification('Uygulama başlatılırken hata oluştu!', 'error');
+
     }
 }
 

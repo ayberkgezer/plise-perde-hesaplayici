@@ -94,7 +94,7 @@ class CustomerInfoManager {
     openCustomerInfoModal() {
         // Hesaplamaları kontrol et
         if (!this.hasCalculations()) {
-            this.showNotification('Lütfen önce hesaplama yapın!', 'warning');
+
             return;
         }
 
@@ -144,7 +144,7 @@ class CustomerInfoManager {
         const customerName = document.getElementById('customerInfoName').value.trim();
         
         if (!customerName) {
-            this.showNotification('Lütfen müşteri adını girin!', 'error');
+
             return false;
         }
         
@@ -205,12 +205,12 @@ class CustomerInfoManager {
             const fileName = `Musteri_Bilgi_Fisi_${orderNumber}_${customerData.name.replace(/\s+/g, '_')}.pdf`;
             pdf.save(fileName);
             
-            this.showNotification('PDF başarıyla oluşturuldu!', 'success');
+
             this.closeCustomerInfoModal();
             
         } catch (error) {
             console.error('PDF oluşturma hatası:', error);
-            this.showNotification('PDF oluşturulurken hata oluştu!', 'error');
+
         }
     }
 
@@ -372,12 +372,12 @@ class CustomerInfoManager {
                 };
             };
             
-            this.showNotification('Yazdırma penceresi açıldı!', 'success');
+
             this.closeCustomerInfoModal();
             
         } catch (error) {
             console.error('Yazdırma hatası:', error);
-            this.showNotification('Yazdırılırken hata oluştu!', 'error');
+
         }
     }
 
@@ -593,56 +593,6 @@ class CustomerInfoManager {
         </body>
         </html>
         `;
-    }
-
-    showNotification(message, type = 'info') {
-        // Basit bir notification sistemi
-        const notification = document.createElement('div');
-        notification.className = `notification notification-${type}`;
-        notification.textContent = message;
-        
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 24px;
-            border-radius: 6px;
-            color: white;
-            font-weight: 500;
-            z-index: 10001;
-            opacity: 0;
-            transform: translateX(100%);
-            transition: all 0.3s ease;
-        `;
-        
-        // Type'a göre renk
-        const colors = {
-            success: '#4caf50',
-            error: '#f44336',
-            warning: '#ff9800',
-            info: '#2196f3'
-        };
-        
-        notification.style.backgroundColor = colors[type] || colors.info;
-        
-        document.body.appendChild(notification);
-        
-        // Animasyon
-        setTimeout(() => {
-            notification.style.opacity = '1';
-            notification.style.transform = 'translateX(0)';
-        }, 100);
-        
-        // Otomatik kaldırma
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            notification.style.transform = 'translateX(100%)';
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 300);
-        }, 3000);
     }
 
     // Türkçe karakterleri PDF için güvenli hale getir

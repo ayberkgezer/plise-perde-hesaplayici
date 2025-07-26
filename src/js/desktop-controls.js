@@ -61,38 +61,6 @@ function createContextMenu() {
     return contextMenu;
 }
 
-// Desktop Notifications
-function showDesktopNotification(title, message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = 'desktop-notification';
-    
-    const icons = {
-        info: 'ℹ️',
-        success: '✅',
-        warning: '⚠️',
-        error: '❌'
-    };
-    
-    notification.innerHTML = `
-        <div class="notification-header">
-            <span class="notification-title">${icons[type]} ${title}</span>
-            <button class="notification-close" onclick="this.parentElement.parentElement.remove()">×</button>
-        </div>
-        <div class="notification-body">${message}</div>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Show notification
-    setTimeout(() => notification.classList.add('show'), 100);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 300);
-    }, 5000);
-}
-
 // Desktop Tooltip System
 function initDesktopTooltips() {
     const tooltip = document.createElement('div');
@@ -158,9 +126,9 @@ function exportData() {
         a.download = `plise-perde-database-export-${new Date().toISOString().split('T')[0]}.json`;
         a.click();
         
-        showDesktopNotification('Dışa Aktarma', 'Veritabanı başarıyla dışa aktarıldı!', 'success');
+
     }).catch(error => {
-        showDesktopNotification('Hata', 'Dışa aktarma sırasında hata oluştu!', 'error');
+
     });
 }
 
@@ -196,7 +164,7 @@ function getAllCalculations() {
 
 function printCalculation() {
     window.print();
-    showDesktopNotification('Yazdırma', 'Yazdırma penceresi açıldı.', 'info');
+
 }
 
 function showAbout() {
@@ -272,10 +240,10 @@ function openExternal(url) {
 function copyToClipboard(text, message = 'Kopyalandı!') {
     if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(text).then(() => {
-            if (window.showNotification) {
-                window.showNotification(message, 'success');
+
+
             } else {
-                showDesktopNotification('Kopyalandı', message, 'success');
+
             }
         }).catch(err => {
             fallbackCopyTextToClipboard(text, message);
@@ -297,13 +265,13 @@ function fallbackCopyTextToClipboard(text, message) {
     
     try {
         document.execCommand('copy');
-        if (window.showNotification) {
-            window.showNotification(message, 'success');
+
+
         } else {
-            showDesktopNotification('Kopyalandı', message, 'success');
+
         }
     } catch (err) {
-        showDesktopNotification('Hata', 'Kopyalama başarısız', 'error');
+
     }
     
     document.body.removeChild(textArea);

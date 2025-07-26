@@ -122,7 +122,7 @@ class CompanyManager {
             this.displayCompanies();
         } catch (error) {
             console.error('Firmalar yüklenirken hata:', error);
-            this.showNotification('Firmalar yüklenemedi!', 'error');
+
         }
     }
 
@@ -169,17 +169,17 @@ class CompanyManager {
         const formData = this.getFormData();
         
         if (!formData.company_name.trim()) {
-            this.showNotification('Firma adı zorunludur!', 'error');
+
             return;
         }
 
         try {
             if (this.currentEditId) {
                 await window.electronAPI.updateCompanyInfo(this.currentEditId, formData);
-                this.showNotification('Firma güncellendi!', 'success');
+
             } else {
                 await window.electronAPI.addCompanyInfo(formData);
-                this.showNotification('Firma eklendi!', 'success');
+
             }
 
             this.clearForm();
@@ -187,7 +187,7 @@ class CompanyManager {
             this.loadActiveCompany();
         } catch (error) {
             console.error('Firma kaydetme hatası:', error);
-            this.showNotification('Firma kaydedilemedi!', 'error');
+
         }
     }
 
@@ -246,16 +246,14 @@ class CompanyManager {
     }
 
     async activateCompany(id) {
-        if (confirm('Bu firmayı aktif yapmak istediğinizden emin misiniz?')) {
-            try {
-                await window.electronAPI.setActiveCompany(id);
-                this.showNotification('Firma aktif yapıldı!', 'success');
-                this.loadCompanies();
-                this.loadActiveCompany();
-            } catch (error) {
-                console.error('Firma aktif yapma hatası:', error);
-                this.showNotification('Firma aktif yapılamadı!', 'error');
-            }
+        try {
+            await window.electronAPI.setActiveCompany(id);
+
+            this.loadCompanies();
+            this.loadActiveCompany();
+        } catch (error) {
+            console.error('Firma aktif yapma hatası:', error);
+
         }
     }
 
@@ -263,25 +261,14 @@ class CompanyManager {
         const company = this.companies.find(c => c.id === id);
         if (!company) return;
 
-        if (confirm(`"${company.company_name}" firmasını silmek istediğinizden emin misiniz?`)) {
-            try {
-                await window.electronAPI.deleteCompany(id);
-                this.showNotification('Firma silindi!', 'success');
-                this.loadCompanies();
-                this.loadActiveCompany();
-            } catch (error) {
-                console.error('Firma silme hatası:', error);
-                this.showNotification('Firma silinemedi!', 'error');
-            }
-        }
-    }
+        try {
+            await window.electronAPI.deleteCompany(id);
 
-    showNotification(message, type = 'info') {
-        // Notification sistemi zaten mevcut
-        if (window.showNotification) {
-            window.showNotification(message, type);
-        } else {
-            alert(message);
+            this.loadCompanies();
+            this.loadActiveCompany();
+        } catch (error) {
+            console.error('Firma silme hatası:', error);
+
         }
     }
 }
