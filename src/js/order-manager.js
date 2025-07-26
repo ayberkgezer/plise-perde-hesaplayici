@@ -6,6 +6,7 @@ class OrderManager {
         this.orderForm = null;
         this.calculations = [];
         this.companyInfo = null;
+        this.costSettings = null;
         this.init();
     }
 
@@ -16,6 +17,7 @@ class OrderManager {
             this.setupEventListeners();
             this.setDefaultDate();
             this.loadCompanyInfo();
+            this.loadCostSettings();
         });
     }
 
@@ -74,6 +76,19 @@ class OrderManager {
         } catch (error) {
             console.error('Firma bilgisi yüklenirken hata:', error);
             this.companyInfo = null;
+        }
+    }
+
+    async loadCostSettings() {
+        try {
+            this.costSettings = await window.electronAPI.getCostSettings();
+        } catch (error) {
+            console.error('Maliyet ayarları yüklenirken hata:', error);
+            this.costSettings = { 
+                fixed_cost_per_unit: 25, 
+                aluminium_cost_per_cm: 0.8, 
+                plise_cutting_multiplier: 2.1 
+            };
         }
     }
 
@@ -195,8 +210,9 @@ class OrderManager {
         if (!this.validateForm()) return;
 
         try {
-            // Firma bilgilerini yeniden yükle
+            // Firma bilgilerini ve maliyet ayarlarını yeniden yükle
             await this.loadCompanyInfo();
+            await this.loadCostSettings();
             
             const customerData = this.getCustomerData();
             const orderNumber = this.generateOrderNumber();
@@ -336,9 +352,10 @@ class OrderManager {
         pdf.setTextColor(0, 0, 0); // Verileri de siyah renkte göster
         this.calculations.forEach((calc) => {
             xPos = 20;
-            // Kesim plise sayısını hesapla (yükseklik * 2.1)
+            // Kesim plise sayısını hesapla (yükseklik * veritabanından gelen çarpan)
             const height = parseFloat(calc.height.replace(' cm', '')) || 0;
-            const kesimPlise = height * 2.1;
+            const multiplier = this.costSettings?.plise_cutting_multiplier || 2.1;
+            const kesimPlise = Math.ceil(height * multiplier);
 
             const data = [calc.quantity, calc.width, calc.height, calc.area, calc.fabric, kesimPlise.toString(), calc.price];
             
@@ -389,8 +406,9 @@ class OrderManager {
         if (!this.validateForm()) return;
 
         try {
-            // Firma bilgilerini yeniden yükle
+            // Firma bilgilerini ve maliyet ayarlarını yeniden yükle
             await this.loadCompanyInfo();
+            await this.loadCostSettings();
             
             const customerData = this.getCustomerData();
             const orderNumber = this.generateOrderNumber();
@@ -424,9 +442,10 @@ class OrderManager {
         
         let tableRows = '';
         this.calculations.forEach(calc => {
-            // Kesim plise sayısını hesapla (yükseklik * 2.1)
+            // Kesim plise sayısını hesapla (yükseklik * veritabanından gelen çarpan)
             const height = parseFloat(calc.height.replace(' cm', '')) || 0;
-            const kesimPlise = Math.ceil(height * 2.1);
+            const multiplier = this.costSettings?.plise_cutting_multiplier || 2.1;
+            const kesimPlise = Math.ceil(height * multiplier);
             
             tableRows += `
                 <tr>

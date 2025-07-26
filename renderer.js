@@ -90,6 +90,7 @@ async function initializeApp() {
     // Cost Settings Elements
     const fixedCostPerUnitInput = document.getElementById('fixedCostPerUnit');
     const aluminiumCostPerCmInput = document.getElementById('aluminiumCostPerCm');
+    const pliseCuttingMultiplierInput = document.getElementById('pliseCuttingMultiplier');
     const saveCostSettingsBtn = document.getElementById('saveCostSettingsBtn');
 
     // Action Buttons
@@ -100,7 +101,8 @@ async function initializeApp() {
     let fabricSeries = [];
     let costSettings = {
         fixed_cost_per_unit: 25,
-        aluminium_cost_per_cm: 0.8
+        aluminium_cost_per_cm: 0.8,
+        plise_cutting_multiplier: 2.1
     };
     let calculations = [];
     let calculationCount = 0;
@@ -157,6 +159,9 @@ async function initializeApp() {
             }
             if (aluminiumCostPerCmInput) {
                 aluminiumCostPerCmInput.value = costSettings.aluminium_cost_per_cm || 0.8;
+            }
+            if (pliseCuttingMultiplierInput) {
+                pliseCuttingMultiplierInput.value = costSettings.plise_cutting_multiplier || 2.1;
             }
             
             renderCostSettingsTable();
@@ -239,6 +244,7 @@ async function initializeApp() {
                 <td>${settings.id || index + 1}</td>
                 <td>${settings.fixed_cost_per_unit || 25}₺</td>
                 <td>${settings.aluminium_cost_per_cm || 0.8}₺</td>
+                <td>${settings.plise_cutting_multiplier || 2.1}</td>
                 <td>${createdDate}</td>
                 <td>${updatedDate}</td>
                 <td>
@@ -551,6 +557,9 @@ async function initializeApp() {
         if (aluminiumCostPerCmInput && costSettings) {
             aluminiumCostPerCmInput.value = costSettings.aluminium_cost_per_cm || 0.8;
         }
+        if (pliseCuttingMultiplierInput && costSettings) {
+            pliseCuttingMultiplierInput.value = costSettings.plise_cutting_multiplier || 2.1;
+        }
         
         // Form alanlarını vurgula
         if (fixedCostPerUnitInput) {
@@ -647,14 +656,15 @@ async function initializeApp() {
         saveCostSettingsBtn.addEventListener('click', async () => {
             const fixedCost = parseFloat(fixedCostPerUnitInput.value);
             const aluminiumCost = parseFloat(aluminiumCostPerCmInput.value);
+            const pliseMultiplier = parseFloat(pliseCuttingMultiplierInput.value);
 
-            if (isNaN(fixedCost) || isNaN(aluminiumCost)) {
+            if (isNaN(fixedCost) || isNaN(aluminiumCost) || isNaN(pliseMultiplier)) {
                 showNotification('Lütfen geçerli değerler girin!', 'error');
                 return;
             }
 
             try {
-                await window.electronAPI.updateCostSettings(fixedCost, aluminiumCost);
+                await window.electronAPI.updateCostSettings(fixedCost, aluminiumCost, pliseMultiplier);
                 
                 // Maliyet ayarlarını güncelle
                 await loadCostSettings();

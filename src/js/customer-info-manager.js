@@ -6,6 +6,7 @@ class CustomerInfoManager {
         this.customerInfoForm = null;
         this.calculations = [];
         this.companyInfo = null;
+        this.costSettings = null;
         this.init();
     }
 
@@ -15,6 +16,7 @@ class CustomerInfoManager {
             this.customerInfoForm = document.getElementById('customerInfoForm');
             this.setupEventListeners();
             this.loadCompanyInfo();
+            this.loadCostSettings();
         });
     }
 
@@ -73,6 +75,19 @@ class CustomerInfoManager {
         } catch (error) {
             console.error('Firma bilgisi yüklenirken hata:', error);
             this.companyInfo = null;
+        }
+    }
+
+    async loadCostSettings() {
+        try {
+            this.costSettings = await window.electronAPI.getCostSettings();
+        } catch (error) {
+            console.error('Maliyet ayarları yüklenirken hata:', error);
+            this.costSettings = { 
+                fixed_cost_per_unit: 25, 
+                aluminium_cost_per_cm: 0.8, 
+                plise_cutting_multiplier: 2.1 
+            };
         }
     }
 
@@ -174,8 +189,9 @@ class CustomerInfoManager {
         if (!this.validateForm()) return;
 
         try {
-            // Firma bilgilerini yeniden yükle
+            // Firma bilgilerini ve maliyet ayarlarını yeniden yükle
             await this.loadCompanyInfo();
+            await this.loadCostSettings();
             
             const customerData = this.getCustomerData();
             const orderNumber = this.generateOrderNumber();
@@ -285,6 +301,8 @@ class CustomerInfoManager {
         let xPos = 20;
         
         pdf.setFont(undefined, 'bold');
+        // Başlıkları siyah renkte göster
+        pdf.setTextColor(0, 0, 0);
         headers.forEach((header, index) => {
             pdf.text(header, xPos, yPos);
             xPos += colWidths[index];
@@ -296,6 +314,7 @@ class CustomerInfoManager {
         
         // Tablo verileri
         pdf.setFont(undefined, 'normal');
+        pdf.setTextColor(0, 0, 0); // Verileri de siyah renkte göster
         this.calculations.forEach((calc) => {
             xPos = 20;
             const data = [calc.quantity, calc.width, calc.height, calc.area, calc.fabric, calc.price];
@@ -333,8 +352,9 @@ class CustomerInfoManager {
         if (!this.validateForm()) return;
 
         try {
-            // Firma bilgilerini yeniden yükle
+            // Firma bilgilerini ve maliyet ayarlarını yeniden yükle
             await this.loadCompanyInfo();
+            await this.loadCostSettings();
             
             const customerData = this.getCustomerData();
             const orderNumber = this.generateOrderNumber();
@@ -546,7 +566,7 @@ class CustomerInfoManager {
 
                 <table class="order-table">
                     <thead>
-                        <tr>
+                        <tr style="background-color: #000; color: #fff;">
                             <th class="text-center">Adet</th>
                             <th class="text-center">Genişlik (cm)</th>
                             <th class="text-center">Yükseklik (cm)</th>

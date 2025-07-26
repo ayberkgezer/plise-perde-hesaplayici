@@ -111,6 +111,7 @@ class DatabaseManager {
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     fixed_cost_per_unit REAL NOT NULL DEFAULT 25,
                     aluminium_cost_per_cm REAL NOT NULL DEFAULT 0.8,
+                    plise_cutting_multiplier REAL NOT NULL DEFAULT 2.1,
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 )`,
@@ -164,7 +165,9 @@ class DatabaseManager {
                         if (completed === tableQueries.length) {
                             // Tablolar oluşturulduktan sonra trigger'ları ekle
                             this.createTriggers().then(() => {
-                                this.initializeDefaultData().then(resolve).catch(reject);
+                                this.migratePliseCuttingMultiplier().then(() => {
+                                    this.initializeDefaultData().then(resolve).catch(reject);
+                                }).catch(reject);
                             }).catch(reject);
                         }
                     }
@@ -226,6 +229,41 @@ class DatabaseManager {
         });
     }
 
+    // Plise kesim çarpanı sütunu migration işlemi
+    migratePliseCuttingMultiplier() {
+        return new Promise((resolve, reject) => {
+            // Önce sütunun var olup olmadığını kontrol et
+            this.db.all("PRAGMA table_info(cost_settings)", (err, columns) => {
+                if (err) {
+                    console.error('Schema kontrol hatası:', err);
+                    reject(err);
+                    return;
+                }
+
+                const hasPliseColumn = columns.some(col => col.name === 'plise_cutting_multiplier');
+                
+                if (!hasPliseColumn) {
+                    console.log('plise_cutting_multiplier sütunu ekleniyor...');
+                    this.db.run(
+                        "ALTER TABLE cost_settings ADD COLUMN plise_cutting_multiplier REAL NOT NULL DEFAULT 2.1",
+                        (alterErr) => {
+                            if (alterErr) {
+                                console.error('Sütun ekleme hatası:', alterErr);
+                                reject(alterErr);
+                            } else {
+                                console.log('plise_cutting_multiplier sütunu başarıyla eklendi');
+                                resolve();
+                            }
+                        }
+                    );
+                } else {
+                    console.log('plise_cutting_multiplier sütunu zaten mevcut');
+                    resolve();
+                }
+            });
+        });
+    }
+
     // Varsayılan verileri ekle
     initializeDefaultData() {
         return new Promise((resolve, reject) => {
@@ -273,8 +311,8 @@ class DatabaseManager {
 
                 if (row.count === 0) {
                     this.db.run(
-                        "INSERT INTO cost_settings (fixed_cost_per_unit, aluminium_cost_per_cm) VALUES (?, ?)",
-                        [25, 0.8],
+                        "INSERT INTO cost_settings (fixed_cost_per_unit, aluminium_cost_per_cm, plise_cutting_multiplier) VALUES (?, ?, ?)",
+                        [25, 0.8, 2.1],
                         (err) => {
                             if (err) {
                                 reject(err);
@@ -343,14 +381,18 @@ class DatabaseManager {
                     console.error('getCostSettings error:', err);
                     reject(err);
                 } else {
-                    const result = row || { fixed_cost_per_unit: 25, aluminium_cost_per_cm: 0.8 };
+                    const result = row || { 
+                        fixed_cost_per_unit: 25, 
+                        aluminium_cost_per_cm: 0.8, 
+                        plise_cutting_multiplier: 2.1 
+                    };
                     resolve(result);
                 }
             });
         });
     }
 
-    updateCostSettings(fixedCostPerUnit, aluminiumCostPerCm) {
+    updateCostSettings(fixedCostPerUnit, aluminiumCostPerCm, pliseCuttingMultiplier = 2.1) {
         return new Promise((resolve, reject) => {
             
             const db = this.db; // Database reference'ını sakla
@@ -366,8 +408,8 @@ class DatabaseManager {
                 if (row) {
                     // Mevcut kaydı güncelle
                     db.run(
-                        "UPDATE cost_settings SET fixed_cost_per_unit = ?, aluminium_cost_per_cm = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-                        [fixedCostPerUnit, aluminiumCostPerCm, row.id],
+                        "UPDATE cost_settings SET fixed_cost_per_unit = ?, aluminium_cost_per_cm = ?, plise_cutting_multiplier = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                        [fixedCostPerUnit, aluminiumCostPerCm, pliseCuttingMultiplier, row.id],
                         function(updateErr) {
                             if (updateErr) {
                                 console.error('UPDATE error:', updateErr);
@@ -380,8 +422,8 @@ class DatabaseManager {
                 } else {
                     // Yeni kayıt ekle
                     db.run(
-                        "INSERT INTO cost_settings (fixed_cost_per_unit, aluminium_cost_per_cm, created_at, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
-                        [fixedCostPerUnit, aluminiumCostPerCm],
+                        "INSERT INTO cost_settings (fixed_cost_per_unit, aluminium_cost_per_cm, plise_cutting_multiplier, created_at, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+                        [fixedCostPerUnit, aluminiumCostPerCm, pliseCuttingMultiplier],
                         function(insertErr) {
                             if (insertErr) {
                                 console.error('INSERT error:', insertErr);

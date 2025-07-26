@@ -318,13 +318,13 @@ ipcMain.handle('db-get-cost-settings', async () => {
   try {
     return await database.getCostSettings();
   } catch (error) {
-    return { fixed_cost_per_unit: 25, aluminium_cost_per_cm: 0.8 };
+    return { fixed_cost_per_unit: 25, aluminium_cost_per_cm: 0.8, plise_cutting_multiplier: 2.1 };
   }
 });
 
-ipcMain.handle('db-update-cost-settings', async (event, fixedCostPerUnit, aluminiumCostPerCm) => {
+ipcMain.handle('db-update-cost-settings', async (event, fixedCostPerUnit, aluminiumCostPerCm, pliseCuttingMultiplier) => {
   try {
-    return await database.updateCostSettings(fixedCostPerUnit, aluminiumCostPerCm);
+    return await database.updateCostSettings(fixedCostPerUnit, aluminiumCostPerCm, pliseCuttingMultiplier);
   } catch (error) {
     throw error;
   }

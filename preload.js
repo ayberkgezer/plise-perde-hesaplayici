@@ -20,7 +20,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   
   // Database operations - Cost Settings
   getCostSettings: () => ipcRenderer.invoke('db-get-cost-settings'),
-  updateCostSettings: (fixedCostPerUnit, aluminiumCostPerCm) => ipcRenderer.invoke('db-update-cost-settings', fixedCostPerUnit, aluminiumCostPerCm),
+  updateCostSettings: (fixedCostPerUnit, aluminiumCostPerCm, pliseCuttingMultiplier) => ipcRenderer.invoke('db-update-cost-settings', fixedCostPerUnit, aluminiumCostPerCm, pliseCuttingMultiplier),
   
   // Database operations - Calculations
   addCalculation: (calculation) => ipcRenderer.invoke('db-add-calculation', calculation),
