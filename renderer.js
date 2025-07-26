@@ -105,6 +105,8 @@ async function initializeApp() {
         plise_cutting_multiplier: 2.1
     };
     let calculations = [];
+    // Make calculations globally accessible
+    window.calculations = calculations;
     let calculationCount = 0;
     let editingFabricId = null;
 
@@ -429,6 +431,8 @@ async function initializeApp() {
 
             // Calculations dizisine ekle
             calculations.push(calculation);
+            // Update global reference
+            window.calculations = calculations;
             
             // Tabloyu güncelle
             renderCalculationResult();
@@ -674,14 +678,19 @@ async function initializeApp() {
         const modal = document.getElementById(modalId);
         if (modal) {
             if (show) {
+                modal.style.display = 'flex';
                 modal.classList.add('active');
                 document.body.classList.add('modal-open');
             } else {
+                modal.style.display = 'none';
                 modal.classList.remove('active');
                 document.body.classList.remove('modal-open');
             }
         }
     }
+    
+    // Make toggleModal globally accessible
+    window.toggleModal = toggleModal;
 
     // --- Event Listeners ---
 

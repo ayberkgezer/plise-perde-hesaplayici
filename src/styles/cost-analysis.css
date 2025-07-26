@@ -18,13 +18,13 @@
 .price-summary-card {
     background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
     color: white;
-    padding: 16px 32px;
-    border-radius: 12px;
-    font-size: 20px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 16px;
     font-weight: 700;
     text-align: center;
     box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-    min-width: 300px;
+    min-width: 250px;
     transition: all 0.3s;
 }
 
@@ -49,22 +49,22 @@
 }
 
 .cost-icon {
-    font-size: 24px;
+    font-size: 20px;
     background: #2196f3;
     color: white;
-    padding: 8px;
-    border-radius: 8px;
+    padding: 6px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 40px;
-    height: 40px;
+    min-width: 32px;
+    height: 32px;
 }
 
 .cost-title h3 {
     margin: 0;
     color: #1976d2;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 600;
 }
 
@@ -89,22 +89,25 @@
     border-radius: 8px;
     overflow: auto;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    min-height: 250px !important; /* Larger minimum for scroll visibility */
     max-height: clamp(300px, 40vh, 500px); /* Responsive yükseklik */
-    overflow-y: auto;
+    overflow-y: scroll !important; /* Always show scrollbar */
     overflow-x: auto;
     scroll-behavior: smooth;
     position: relative;
-    /* Cross-browser scroll desteği */
-    -ms-overflow-style: scrollbar;
+    /* Force scrollbar visibility */
+    -ms-overflow-style: scrollbar !important;
     scrollbar-width: thin;
     scrollbar-color: #2196f3 #f1f1f1;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* Responsive cost table scroll bars */
+/* Always visible cost table scroll bars */
 .cost-table-wrapper::-webkit-scrollbar {
-    width: clamp(8px, 1vw, 14px);
-    height: clamp(8px, 1vw, 14px);
+    width: 14px !important; /* Fixed size for visibility */
+    height: 14px !important;
     background: #f1f1f1;
+    display: block !important;
 }
 
 .cost-table-wrapper::-webkit-scrollbar-track {
@@ -117,7 +120,8 @@
     background: linear-gradient(135deg, #2196f3, #1976d2);
     border-radius: 4px;
     border: 2px solid #f1f1f1;
-    min-height: 30px;
+    min-height: 50px !important; /* Larger thumb */
+    display: block !important;
 }
 
 .cost-table-wrapper::-webkit-scrollbar-thumb:hover {
@@ -141,22 +145,23 @@
     width: 100%;
     border-collapse: collapse;
     background: white;
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .cost-table th {
     background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
     color: white;
-    padding: 12px 10px;
+    padding: 8px 6px;
     text-align: left;
     font-weight: 600;
-    font-size: 13px;
+    font-size: 11px;
 }
 
 .cost-table td {
-    padding: 10px;
+    padding: 6px;
     border-bottom: 1px solid #e0e0e0;
     vertical-align: middle;
+    font-size: 11px;
 }
 
 .cost-table tbody tr:nth-child(even) {
@@ -184,21 +189,21 @@
 }
 
 .cost-total {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     color: #1976d2;
     text-align: center;
 }
 
 .revenue-total {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     color: #7b1fa2;
     text-align: center;
 }
 
 .profit-total {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     color: #388e3c;
     text-align: center;

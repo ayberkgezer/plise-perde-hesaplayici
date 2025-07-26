@@ -11,21 +11,33 @@ class OrderManager {
     }
 
     init() {
-        document.addEventListener('DOMContentLoaded', () => {
-            this.orderModal = document.getElementById('orderModal');
-            this.orderForm = document.getElementById('orderForm');
-            this.setupEventListeners();
-            this.setDefaultDate();
-            this.loadCompanyInfo();
-            this.loadCostSettings();
-        });
+        // Ensure DOM is ready before initializing
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.initializeElements());
+        } else {
+            this.initializeElements();
+        }
+    }
+
+    initializeElements() {
+        this.orderModal = document.getElementById('orderModal');
+        this.orderForm = document.getElementById('orderForm');
+        this.setupEventListeners();
+        this.setDefaultDate();
+        this.loadCompanyInfo();
+        this.loadCostSettings();
     }
 
     setupEventListeners() {
         // Fiş Çıkar butonu
         const orderFormBtn = document.getElementById('orderFormBtn');
         if (orderFormBtn) {
-            orderFormBtn.addEventListener('click', () => this.openOrderModal());
+            orderFormBtn.addEventListener('click', () => {
+                console.log('Fiş Çıkar butonuna tıklandı');
+                this.openOrderModal();
+            });
+        } else {
+            console.error('orderFormBtn bulunamadı!');
         }
 
         // Modal kapatma butonları
@@ -111,13 +123,15 @@ class OrderManager {
         this.updateCalculations();
         
         if (this.orderModal) {
-            toggleModal('orderModal', true);
+            window.toggleModal('orderModal', true);
+        } else {
+            console.error('orderModal bulunamadı!');
         }
     }
 
     closeOrderModal() {
         if (this.orderModal) {
-            toggleModal('orderModal', false);
+            window.toggleModal('orderModal', false);
             this.resetForm();
         }
     }
@@ -129,21 +143,28 @@ class OrderManager {
 
     updateCalculations() {
         this.calculations = [];
-        const resultTable = document.getElementById('resultTable');
         
-        if (resultTable) {
-            const rows = resultTable.getElementsByTagName('tr');
-            for (let row of rows) {
-                const cells = row.getElementsByTagName('td');
-                if (cells.length >= 6) {
-                    this.calculations.push({
-                        quantity: cells[0].textContent,
-                        width: cells[1].textContent,
-                        height: cells[2].textContent,
-                        area: cells[3].textContent,
-                        fabric: cells[4].textContent,
-                        price: cells[5].textContent
-                    });
+        // Access global calculations from renderer.js
+        if (window.calculations && Array.isArray(window.calculations)) {
+            this.calculations = [...window.calculations];
+        } else {
+            // Fallback: read from table if global calculations not available
+            const resultTable = document.getElementById('resultTable');
+            
+            if (resultTable) {
+                const rows = resultTable.getElementsByTagName('tr');
+                for (let row of rows) {
+                    const cells = row.getElementsByTagName('td');
+                    if (cells.length >= 6) {
+                        this.calculations.push({
+                            quantity: cells[0].textContent,
+                            width: cells[1].textContent,
+                            height: cells[2].textContent,
+                            area: cells[3].textContent,
+                            fabric: cells[4].textContent,
+                            price: cells[5].textContent
+                        });
+                    }
                 }
             }
         }
@@ -185,13 +206,24 @@ class OrderManager {
     }
 
     getTotalPrice() {
-        const totalPriceEl = document.getElementById('totalPrice');
-        if (totalPriceEl) {
-            const text = totalPriceEl.textContent;
-            const match = text.match(/([0-9,]+(?:\.[0-9]{2})?)/);
-            return match ? match[1] : '0';
+        // Calculations dizisinden direkt hesapla
+        let total = 0;
+        this.calculations.forEach(calc => {
+            const price = calc.total_price || calc.price || 0;
+            total += parseFloat(price) || 0;
+        });
+        
+        // Fallback: DOM'dan oku
+        if (total === 0) {
+            const totalPriceEl = document.getElementById('totalPrice');
+            if (totalPriceEl) {
+                const text = totalPriceEl.textContent;
+                const match = text.match(/([0-9,]+(?:\.[0-9]{2})?)/);
+                return match ? match[1] : '0';
+            }
         }
-        return '0';
+        
+        return total.toFixed(2);
     }
 
     generateOrderNumber() {
@@ -205,15 +237,33 @@ class OrderManager {
     }
 
     async generateOrderPDF() {
-        if (!this.validateForm()) return;
+        console.log('PDF oluşturma başlatıldı');
+        
+        if (!this.validateForm()) {
+            console.log('Form validation başarısız');
+            return;
+        }
 
         try {
+            // jsPDF kütüphanesini kontrol et
+            if (!window.jspdf) {
+                console.error('jsPDF kütüphanesi yüklenmemiş');
+                alert('PDF kütüphanesi yüklenmemiş. Sayfayı yenileyin.');
+                return;
+            }
+            
+            console.log('jsPDF kütüphanesi bulundu');
+            
             // Firma bilgilerini ve maliyet ayarlarını yeniden yükle
             await this.loadCompanyInfo();
             await this.loadCostSettings();
             
             const customerData = this.getCustomerData();
             const orderNumber = this.generateOrderNumber();
+            
+            console.log('Müşteri verileri:', customerData);
+            console.log('Sipariş numarası:', orderNumber);
+            console.log('Calculations:', this.calculations);
             
             // PDF oluştur
             const { jsPDF } = window.jspdf;
@@ -224,14 +274,17 @@ class OrderManager {
             
             // PDF'i kaydet
             const fileName = `Siparis_${orderNumber}_${customerData.name.replace(/\s+/g, '_')}.pdf`;
+            console.log('PDF kaydediliyor:', fileName);
             pdf.save(fileName);
             
+            console.log('PDF başarıyla oluşturuldu');
+            alert('PDF başarıyla oluşturuldu ve indirildi!');
 
             this.closeOrderModal();
             
         } catch (error) {
             console.error('PDF oluşturma hatası:', error);
-
+            alert('PDF oluşturulurken hata oluştu: ' + error.message);
         }
     }
 
@@ -351,11 +404,23 @@ class OrderManager {
         this.calculations.forEach((calc) => {
             xPos = 20;
             // Kesim plise sayısını hesapla (yükseklik * veritabanından gelen çarpan)
-            const height = parseFloat(calc.height.replace(' cm', '')) || 0;
+            const height = typeof calc.height === 'string' ? 
+                parseFloat(calc.height.replace(' cm', '')) : 
+                parseFloat(calc.height) || 0;
             const multiplier = this.costSettings?.plise_cutting_multiplier || 2.1;
             const kesimPlise = Math.ceil(height * multiplier);
 
-            const data = [calc.quantity, calc.width, calc.height, calc.area, calc.fabric, kesimPlise.toString(), calc.price];
+            // Veri tiplerini güvenli hale getir
+            const safeQuantity = calc.quantity?.toString() || '1';
+            const safeWidth = typeof calc.width === 'string' ? calc.width : `${calc.width} cm`;
+            const safeHeight = typeof calc.height === 'string' ? calc.height : `${calc.height} cm`;
+            const safeArea = typeof calc.area === 'string' ? calc.area : `${calc.area} m²`;
+            const safeFabric = (calc.fabric_name || calc.fabric)?.toString() || 'Belirtilmemiş';
+            const safePrice = typeof calc.total_price === 'string' ? calc.total_price : 
+                            (calc.total_price ? `${calc.total_price} TL` : 
+                            (calc.price ? `${calc.price} TL` : 'Fiyat belirtilmemiş'));
+            
+            const data = [safeQuantity, safeWidth, safeHeight, safeArea, safeFabric, kesimPlise.toString(), safePrice];
             
             data.forEach((item, index) => {
                 const text = item.toString();
@@ -401,7 +466,12 @@ class OrderManager {
     }
 
     async printOrder() {
-        if (!this.validateForm()) return;
+        console.log('Yazdırma başlatıldı');
+        
+        if (!this.validateForm()) {
+            console.log('Form validation başarısız');
+            return;
+        }
 
         try {
             // Firma bilgilerini ve maliyet ayarlarını yeniden yükle
@@ -411,27 +481,41 @@ class OrderManager {
             const customerData = this.getCustomerData();
             const orderNumber = this.generateOrderNumber();
             
+            console.log('Yazdırma için müşteri verileri:', customerData);
+            console.log('Yazdırma için sipariş numarası:', orderNumber);
+            console.log('Yazdırma için calculations:', this.calculations);
+            
             // Yazdırılabilir HTML içeriği oluştur
             const printContent = this.createPrintableHTML(customerData, orderNumber);
             
+            console.log('Print content oluşturuldu');
+            
             // Yeni pencere açıp yazdır
             const printWindow = window.open('', '_blank');
+            if (!printWindow) {
+                alert('Pop-up engellendi! Lütfen pop-up engelini kaldırın.');
+                return;
+            }
+            
             printWindow.document.write(printContent);
             printWindow.document.close();
             
             printWindow.onload = function() {
+                console.log('Print window yüklendi, yazdırma başlatılıyor');
                 printWindow.print();
                 printWindow.onafterprint = function() {
+                    console.log('Yazdırma tamamlandı, pencere kapatılıyor');
                     printWindow.close();
                 };
             };
             
+            console.log('Yazdırma işlemi başarıyla başlatıldı');
 
             this.closeOrderModal();
             
         } catch (error) {
             console.error('Yazdırma hatası:', error);
-
+            alert('Yazdırma sırasında hata oluştu: ' + error.message);
         }
     }
 
@@ -441,19 +525,31 @@ class OrderManager {
         let tableRows = '';
         this.calculations.forEach(calc => {
             // Kesim plise sayısını hesapla (yükseklik * veritabanından gelen çarpan)
-            const height = parseFloat(calc.height.replace(' cm', '')) || 0;
+            const height = typeof calc.height === 'string' ? 
+                parseFloat(calc.height.replace(' cm', '')) : 
+                parseFloat(calc.height) || 0;
             const multiplier = this.costSettings?.plise_cutting_multiplier || 2.1;
             const kesimPlise = Math.ceil(height * multiplier);
             
+            // HTML için veri tiplerini güvenli hale getir
+            const safeQuantity = calc.quantity?.toString() || '1';
+            const safeWidth = typeof calc.width === 'string' ? calc.width : `${calc.width} cm`;
+            const safeHeight = typeof calc.height === 'string' ? calc.height : `${calc.height} cm`;
+            const safeArea = typeof calc.area === 'string' ? calc.area : `${calc.area} m²`;
+            const safeFabric = (calc.fabric_name || calc.fabric)?.toString() || 'Belirtilmemiş';
+            const safePrice = typeof calc.total_price === 'string' ? calc.total_price : 
+                            (calc.total_price ? `${calc.total_price} TL` : 
+                            (calc.price ? `${calc.price} TL` : 'Fiyat belirtilmemiş'));
+            
             tableRows += `
                 <tr>
-                    <td class="text-center">${calc.quantity}</td>
-                    <td class="text-center">${calc.width}</td>
-                    <td class="text-center">${calc.height}</td>
-                    <td class="text-center">${calc.area}</td>
-                    <td>${calc.fabric}</td>
+                    <td class="text-center">${safeQuantity}</td>
+                    <td class="text-center">${safeWidth}</td>
+                    <td class="text-center">${safeHeight}</td>
+                    <td class="text-center">${safeArea}</td>
+                    <td>${safeFabric}</td>
                     <td class="text-center">${kesimPlise}</td>
-                    <td class="text-right">${calc.price}</td>
+                    <td class="text-right">${safePrice}</td>
                 </tr>
             `;
         });

@@ -11,20 +11,32 @@ class CustomerInfoManager {
     }
 
     init() {
-        document.addEventListener('DOMContentLoaded', () => {
-            this.customerInfoModal = document.getElementById('customerInfoModal');
-            this.customerInfoForm = document.getElementById('customerInfoForm');
-            this.setupEventListeners();
-            this.loadCompanyInfo();
-            this.loadCostSettings();
-        });
+        // Ensure DOM is ready before initializing
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.initializeElements());
+        } else {
+            this.initializeElements();
+        }
+    }
+
+    initializeElements() {
+        this.customerInfoModal = document.getElementById('customerInfoModal');
+        this.customerInfoForm = document.getElementById('customerInfoForm');
+        this.setupEventListeners();
+        this.loadCompanyInfo();
+        this.loadCostSettings();
     }
 
     setupEventListeners() {
         // Müşteri Bilgi Fişi butonu
         const customerInfoBtn = document.getElementById('customerInfoBtn');
         if (customerInfoBtn) {
-            customerInfoBtn.addEventListener('click', () => this.openCustomerInfoModal());
+            customerInfoBtn.addEventListener('click', () => {
+                console.log('Müşteri Bilgi Fişi butonuna tıklandı');
+                this.openCustomerInfoModal();
+            });
+        } else {
+            console.error('customerInfoBtn bulunamadı!');
         }
 
         // Modal kapatma butonları
@@ -102,13 +114,15 @@ class CustomerInfoManager {
         this.updateCalculations();
         
         if (this.customerInfoModal) {
-            toggleModal('customerInfoModal', true);
+            window.toggleModal('customerInfoModal', true);
+        } else {
+            console.error('customerInfoModal bulunamadı!');
         }
     }
 
     closeCustomerInfoModal() {
         if (this.customerInfoModal) {
-            toggleModal('customerInfoModal', false);
+            window.toggleModal('customerInfoModal', false);
             this.resetForm();
         }
     }
@@ -120,21 +134,28 @@ class CustomerInfoManager {
 
     updateCalculations() {
         this.calculations = [];
-        const resultTable = document.getElementById('resultTable');
         
-        if (resultTable) {
-            const rows = resultTable.getElementsByTagName('tr');
-            for (let row of rows) {
-                const cells = row.getElementsByTagName('td');
-                if (cells.length >= 6) {
-                    this.calculations.push({
-                        quantity: cells[0].textContent,
-                        width: cells[1].textContent,
-                        height: cells[2].textContent,
-                        area: cells[3].textContent,
-                        fabric: cells[4].textContent,
-                        price: cells[5].textContent
-                    });
+        // Access global calculations from renderer.js
+        if (window.calculations && Array.isArray(window.calculations)) {
+            this.calculations = [...window.calculations];
+        } else {
+            // Fallback: read from table if global calculations not available
+            const resultTable = document.getElementById('resultTable');
+            
+            if (resultTable) {
+                const rows = resultTable.getElementsByTagName('tr');
+                for (let row of rows) {
+                    const cells = row.getElementsByTagName('td');
+                    if (cells.length >= 6) {
+                        this.calculations.push({
+                            quantity: cells[0].textContent,
+                            width: cells[1].textContent,
+                            height: cells[2].textContent,
+                            area: cells[3].textContent,
+                            fabric: cells[4].textContent,
+                            price: cells[5].textContent
+                        });
+                    }
                 }
             }
         }
@@ -164,13 +185,24 @@ class CustomerInfoManager {
     }
 
     getTotalPrice() {
-        const totalPriceEl = document.getElementById('totalPrice');
-        if (totalPriceEl) {
-            const text = totalPriceEl.textContent;
-            const match = text.match(/([0-9,]+(?:\.[0-9]{2})?)/);
-            return match ? match[1] : '0';
+        // Calculations dizisinden direkt hesapla
+        let total = 0;
+        this.calculations.forEach(calc => {
+            const price = calc.total_price || calc.price || 0;
+            total += parseFloat(price) || 0;
+        });
+        
+        // Fallback: DOM'dan oku
+        if (total === 0) {
+            const totalPriceEl = document.getElementById('totalPrice');
+            if (totalPriceEl) {
+                const text = totalPriceEl.textContent;
+                const match = text.match(/([0-9,]+(?:\.[0-9]{2})?)/);
+                return match ? match[1] : '0';
+            }
         }
-        return '0';
+        
+        return total.toFixed(2);
     }
 
     generateOrderNumber() {
@@ -315,7 +347,17 @@ class CustomerInfoManager {
         pdf.setTextColor(0, 0, 0); // Verileri de siyah renkte göster
         this.calculations.forEach((calc) => {
             xPos = 20;
-            const data = [calc.quantity, calc.width, calc.height, calc.area, calc.fabric, calc.price];
+            // Veri tiplerini güvenli hale getir
+            const safeQuantity = calc.quantity?.toString() || '1';
+            const safeWidth = typeof calc.width === 'string' ? calc.width : `${calc.width} cm`;
+            const safeHeight = typeof calc.height === 'string' ? calc.height : `${calc.height} cm`;
+            const safeArea = typeof calc.area === 'string' ? calc.area : `${calc.area} m²`;
+            const safeFabric = (calc.fabric_name || calc.fabric)?.toString() || 'Belirtilmemiş';
+            const safePrice = typeof calc.total_price === 'string' ? calc.total_price : 
+                            (calc.total_price ? `${calc.total_price} TL` : 
+                            (calc.price ? `${calc.price} TL` : 'Fiyat belirtilmemiş'));
+            
+            const data = [safeQuantity, safeWidth, safeHeight, safeArea, safeFabric, safePrice];
             
             data.forEach((item, index) => {
                 const text = item.toString();
@@ -386,14 +428,24 @@ class CustomerInfoManager {
         
         let tableRows = '';
         this.calculations.forEach(calc => {
+            // HTML için veri tiplerini güvenli hale getir
+            const safeQuantity = calc.quantity?.toString() || '1';
+            const safeWidth = typeof calc.width === 'string' ? calc.width : `${calc.width} cm`;
+            const safeHeight = typeof calc.height === 'string' ? calc.height : `${calc.height} cm`;
+            const safeArea = typeof calc.area === 'string' ? calc.area : `${calc.area} m²`;
+            const safeFabric = (calc.fabric_name || calc.fabric)?.toString() || 'Belirtilmemiş';
+            const safePrice = typeof calc.total_price === 'string' ? calc.total_price : 
+                            (calc.total_price ? `${calc.total_price} TL` : 
+                            (calc.price ? `${calc.price} TL` : 'Fiyat belirtilmemiş'));
+            
             tableRows += `
                 <tr>
-                    <td class="text-center">${calc.quantity}</td>
-                    <td class="text-center">${calc.width}</td>
-                    <td class="text-center">${calc.height}</td>
-                    <td class="text-center">${calc.area}</td>
-                    <td>${calc.fabric}</td>
-                    <td class="text-right">${calc.price}</td>
+                    <td class="text-center">${safeQuantity}</td>
+                    <td class="text-center">${safeWidth}</td>
+                    <td class="text-center">${safeHeight}</td>
+                    <td class="text-center">${safeArea}</td>
+                    <td>${safeFabric}</td>
+                    <td class="text-right">${safePrice}</td>
                 </tr>
             `;
         });
