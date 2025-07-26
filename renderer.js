@@ -333,9 +333,22 @@ async function initializeApp() {
             [fabricNameInput, fabricPriceInput, fabricCostInput].forEach(input => {
                 if (input) {
                     input.style.pointerEvents = 'auto';
+                    input.style.userSelect = 'text';
+                    input.style.webkitUserSelect = 'text';
                     input.tabIndex = 0;
+                    input.removeAttribute('disabled');
+                    input.removeAttribute('readonly');
+                    
+                    // Event listener'ları yeniden ekle
+                    input.addEventListener('focus', function() {
+                        this.style.pointerEvents = 'auto';
+                    });
+                    input.addEventListener('click', function() {
+                        this.focus();
+                    });
                 }
             });
+            fixInputFocus(); // Tüm input'ları bir kez daha kontrol et
         }, 100);
     }
 
@@ -404,11 +417,18 @@ async function initializeApp() {
             
             // Yeni eklenen satıra scroll yap
             setTimeout(() => {
+                const tableContainer = document.querySelector('.table-container');
                 const resultTable = document.getElementById('resultTable');
-                if (resultTable && resultTable.lastElementChild) {
-                    resultTable.lastElementChild.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'nearest' 
+                if (tableContainer && resultTable && resultTable.lastElementChild) {
+                    // Table container içinde scroll yap
+                    const lastRow = resultTable.lastElementChild;
+                    const containerHeight = tableContainer.clientHeight;
+                    const rowOffsetTop = lastRow.offsetTop;
+                    const scrollPosition = Math.max(0, rowOffsetTop - containerHeight + lastRow.clientHeight + 20);
+                    
+                    tableContainer.scrollTo({ 
+                        top: scrollPosition, 
+                        behavior: 'smooth' 
                     });
                 }
             }, 100);
@@ -638,10 +658,32 @@ async function initializeApp() {
         const allInputs = document.querySelectorAll('input, select, textarea');
         allInputs.forEach(input => {
             if (input) {
+                // Tüm kısıtlamaları kaldır
                 input.style.pointerEvents = 'auto';
+                input.style.userSelect = 'text';
+                input.style.webkitUserSelect = 'text';
                 input.tabIndex = input.tabIndex || 0;
                 input.removeAttribute('disabled');
-                input.style.userSelect = 'text';
+                input.removeAttribute('readonly');
+                
+                // Event listener'ları yeniden etkinleştir
+                if (input.type !== 'hidden') {
+                    input.addEventListener('focus', function() {
+                        this.style.pointerEvents = 'auto';
+                    });
+                    input.addEventListener('click', function() {
+                        this.focus();
+                    });
+                }
+            }
+        });
+        
+        // Button'ları da kontrol et
+        const allButtons = document.querySelectorAll('button');
+        allButtons.forEach(button => {
+            if (button) {
+                button.style.pointerEvents = 'auto';
+                button.removeAttribute('disabled');
             }
         });
     }
@@ -649,6 +691,8 @@ async function initializeApp() {
     // Her işlemden sonra input focus'unu düzelt
     function scheduleInputFix() {
         setTimeout(fixInputFocus, 100);
+        setTimeout(fixInputFocus, 300); // Ekstra güvenlik
+        setTimeout(fixInputFocus, 600); // Çok ekstra güvenlik
     }
 
     // --- Event Listeners ---
@@ -706,10 +750,12 @@ async function initializeApp() {
                 // Form işlemi tamamlandıktan sonra input focus'u sıfırla
                 scheduleInputFix();
                 setTimeout(() => {
+                    fixInputFocus(); // Ekstra güvenlik için
                     if (fabricNameInput) {
+                        fabricNameInput.style.pointerEvents = 'auto';
                         fabricNameInput.focus();
                     }
-                }, 300);
+                }, 500); // Süreyi artırdık
             } catch (error) {
                 showNotification('Kumaş serisi kaydedilirken hata oluştu!', 'error');
             }
@@ -744,11 +790,13 @@ async function initializeApp() {
                 // Input alanlarını tekrar odaklanabilir hale getir
                 scheduleInputFix();
                 setTimeout(() => {
+                    fixInputFocus(); // Ekstra güvenlik için
                     if (fixedCostPerUnitInput) {
+                        fixedCostPerUnitInput.style.pointerEvents = 'auto';
                         fixedCostPerUnitInput.blur();
                         fixedCostPerUnitInput.focus();
                     }
-                }, 300);
+                }, 500); // Süreyi artırdık
             } catch (error) {
                 showNotification('Maliyet ayarları kaydedilirken hata oluştu!', 'error');
             }
@@ -871,10 +919,21 @@ async function initializeApp() {
             allInputs.forEach(input => {
                 if (input) {
                     input.style.pointerEvents = 'auto';
+                    input.style.userSelect = 'text';
+                    input.style.webkitUserSelect = 'text';
                     input.tabIndex = input.tabIndex || 0;
                     input.removeAttribute('disabled');
+                    input.removeAttribute('readonly');
+                    
+                    // Click event listener ekle
+                    if (input.type !== 'hidden') {
+                        input.addEventListener('click', function() {
+                            this.focus();
+                        });
+                    }
                 }
             });
+            fixInputFocus(); // İlk kontrolü yap
         }, 500);
         
         // DOM değişikliklerini izle ve input focus sorunlarını düzelt
@@ -885,7 +944,7 @@ async function initializeApp() {
             childList: true, 
             subtree: true, 
             attributes: true,
-            attributeFilter: ['disabled', 'readonly']
+            attributeFilter: ['disabled', 'readonly', 'style']
         });
         
         // Auto-focus on width input
