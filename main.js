@@ -229,9 +229,7 @@ app.whenReady().then(async () => {
   database = new DatabaseManager();
   try {
     await database.connect();
-    console.log('Veritabanı başarıyla başlatıldı.');
   } catch (error) {
-    console.error('Veritabanı başlatma hatası:', error);
     // Kritik hata: Uygulama devam edebilir mi?
     const response = dialog.showMessageBoxSync(null, {
       type: 'error',
@@ -408,7 +406,6 @@ ipcMain.handle('db-get-company-info', async () => {
   try {
     return await database.getCompanyInfo();
   } catch (error) {
-    console.error('Firma bilgisi alma hatası:', error);
     return null;
   }
 });
@@ -417,7 +414,6 @@ ipcMain.handle('db-add-company-info', async (event, companyData) => {
   try {
     return await database.addCompanyInfo(companyData);
   } catch (error) {
-    console.error('Firma ekleme hatası:', error);
     throw error;
   }
 });
@@ -426,7 +422,6 @@ ipcMain.handle('db-update-company-info', async (event, id, companyData) => {
   try {
     return await database.updateCompanyInfo(id, companyData);
   } catch (error) {
-    console.error('Firma güncelleme hatası:', error);
     throw error;
   }
 });
@@ -435,7 +430,6 @@ ipcMain.handle('db-get-all-companies', async () => {
   try {
     return await database.getAllCompanies();
   } catch (error) {
-    console.error('Tüm firmaları alma hatası:', error);
     return [];
   }
 });
@@ -444,7 +438,6 @@ ipcMain.handle('db-set-active-company', async (event, id) => {
   try {
     return await database.setActiveCompany(id);
   } catch (error) {
-    console.error('Aktif firma ayarlama hatası:', error);
     throw error;
   }
 });
@@ -453,7 +446,6 @@ ipcMain.handle('db-delete-company', async (event, id) => {
   try {
     return await database.deleteCompany(id);
   } catch (error) {
-    console.error('Firma silme hatası:', error);
     throw error;
   }
 });

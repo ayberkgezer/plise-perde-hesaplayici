@@ -32,11 +32,9 @@ class CustomerInfoManager {
         const customerInfoBtn = document.getElementById('customerInfoBtn');
         if (customerInfoBtn) {
             customerInfoBtn.addEventListener('click', () => {
-                console.log('Müşteri Bilgi Fişi butonuna tıklandı');
                 this.openCustomerInfoModal();
             });
         } else {
-            console.error('customerInfoBtn bulunamadı!');
         }
 
         // Modal kapatma butonları
@@ -85,7 +83,6 @@ class CustomerInfoManager {
         try {
             this.companyInfo = await window.electronAPI.getCompanyInfo();
         } catch (error) {
-            console.error('Firma bilgisi yüklenirken hata:', error);
             this.companyInfo = null;
         }
     }
@@ -94,7 +91,6 @@ class CustomerInfoManager {
         try {
             this.costSettings = await window.electronAPI.getCostSettings();
         } catch (error) {
-            console.error('Maliyet ayarları yüklenirken hata:', error);
             this.costSettings = { 
                 fixed_cost_per_unit: 25, 
                 aluminium_cost_per_cm: 0.8, 
@@ -116,7 +112,6 @@ class CustomerInfoManager {
         if (this.customerInfoModal) {
             window.toggleModal('customerInfoModal', true);
         } else {
-            console.error('customerInfoModal bulunamadı!');
         }
     }
 
@@ -241,7 +236,6 @@ class CustomerInfoManager {
             this.closeCustomerInfoModal();
             
         } catch (error) {
-            console.error('PDF oluşturma hatası:', error);
 
         }
     }
@@ -251,7 +245,6 @@ class CustomerInfoManager {
         try {
             pdf.setFont('helvetica', 'normal');
         } catch (e) {
-            console.warn('Font ayarı başarısız, varsayılan font kullanılıyor');
         }
         
         // PDF Başlığı
@@ -418,7 +411,6 @@ class CustomerInfoManager {
             this.closeCustomerInfoModal();
             
         } catch (error) {
-            console.error('Yazdırma hatası:', error);
 
         }
     }

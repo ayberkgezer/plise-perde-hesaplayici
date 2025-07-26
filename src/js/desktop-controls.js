@@ -240,7 +240,6 @@ function openExternal(url) {
 function copyToClipboard(text) {
     if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(text).then(() => {
-            console.log('Kopyalandı: ' + text);
         }).catch(() => {
             fallbackCopyTextToClipboard(text);
         });
@@ -262,12 +261,9 @@ function fallbackCopyTextToClipboard(text) {
     try {
         const successful = document.execCommand('copy');
         if (successful) {
-            console.log('Kopyalandı: ' + text);
         } else {
-            console.log('Kopyalama başarısız');
         }
     } catch (err) {
-        console.log('Kopyalama hatası: ' + err);
     }
     
     document.body.removeChild(textArea);

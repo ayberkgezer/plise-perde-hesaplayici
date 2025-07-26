@@ -49,7 +49,6 @@ class CompanyManager {
             this.activeCompany = company;
             this.displayActiveCompany(company);
         } catch (error) {
-            console.error('Aktif firma yüklenirken hata:', error);
             this.displayActiveCompany(null);
         }
     }
@@ -121,7 +120,6 @@ class CompanyManager {
             this.companies = await window.electronAPI.getAllCompanies();
             this.displayCompanies();
         } catch (error) {
-            console.error('Firmalar yüklenirken hata:', error);
 
         }
     }
@@ -186,7 +184,6 @@ class CompanyManager {
             this.loadCompanies();
             this.loadActiveCompany();
         } catch (error) {
-            console.error('Firma kaydetme hatası:', error);
 
         }
     }
@@ -252,7 +249,6 @@ class CompanyManager {
             this.loadCompanies();
             this.loadActiveCompany();
         } catch (error) {
-            console.error('Firma aktif yapma hatası:', error);
 
         }
     }
@@ -267,7 +263,6 @@ class CompanyManager {
             this.loadCompanies();
             this.loadActiveCompany();
         } catch (error) {
-            console.error('Firma silme hatası:', error);
 
         }
     }

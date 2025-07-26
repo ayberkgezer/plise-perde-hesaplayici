@@ -33,11 +33,9 @@ class OrderManager {
         const orderFormBtn = document.getElementById('orderFormBtn');
         if (orderFormBtn) {
             orderFormBtn.addEventListener('click', () => {
-                console.log('Fiş Çıkar butonuna tıklandı');
                 this.openOrderModal();
             });
         } else {
-            console.error('orderFormBtn bulunamadı!');
         }
 
         // Modal kapatma butonları
@@ -86,7 +84,6 @@ class OrderManager {
         try {
             this.companyInfo = await window.electronAPI.getCompanyInfo();
         } catch (error) {
-            console.error('Firma bilgisi yüklenirken hata:', error);
             this.companyInfo = null;
         }
     }
@@ -95,7 +92,6 @@ class OrderManager {
         try {
             this.costSettings = await window.electronAPI.getCostSettings();
         } catch (error) {
-            console.error('Maliyet ayarları yüklenirken hata:', error);
             this.costSettings = { 
                 fixed_cost_per_unit: 25, 
                 aluminium_cost_per_cm: 0.8, 
@@ -125,7 +121,6 @@ class OrderManager {
         if (this.orderModal) {
             window.toggleModal('orderModal', true);
         } else {
-            console.error('orderModal bulunamadı!');
         }
     }
 
@@ -237,22 +232,18 @@ class OrderManager {
     }
 
     async generateOrderPDF() {
-        console.log('PDF oluşturma başlatıldı');
         
         if (!this.validateForm()) {
-            console.log('Form validation başarısız');
             return;
         }
 
         try {
             // jsPDF kütüphanesini kontrol et
             if (!window.jspdf) {
-                console.error('jsPDF kütüphanesi yüklenmemiş');
                 alert('PDF kütüphanesi yüklenmemiş. Sayfayı yenileyin.');
                 return;
             }
             
-            console.log('jsPDF kütüphanesi bulundu');
             
             // Firma bilgilerini ve maliyet ayarlarını yeniden yükle
             await this.loadCompanyInfo();
@@ -261,9 +252,6 @@ class OrderManager {
             const customerData = this.getCustomerData();
             const orderNumber = this.generateOrderNumber();
             
-            console.log('Müşteri verileri:', customerData);
-            console.log('Sipariş numarası:', orderNumber);
-            console.log('Calculations:', this.calculations);
             
             // PDF oluştur
             const { jsPDF } = window.jspdf;
@@ -274,16 +262,13 @@ class OrderManager {
             
             // PDF'i kaydet
             const fileName = `Siparis_${orderNumber}_${customerData.name.replace(/\s+/g, '_')}.pdf`;
-            console.log('PDF kaydediliyor:', fileName);
             pdf.save(fileName);
             
-            console.log('PDF başarıyla oluşturuldu');
             alert('PDF başarıyla oluşturuldu ve indirildi!');
 
             this.closeOrderModal();
             
         } catch (error) {
-            console.error('PDF oluşturma hatası:', error);
             alert('PDF oluşturulurken hata oluştu: ' + error.message);
         }
     }
@@ -293,7 +278,6 @@ class OrderManager {
         try {
             pdf.setFont('helvetica', 'normal');
         } catch (e) {
-            console.warn('Font ayarı başarısız, varsayılan font kullanılıyor');
         }
         
         // PDF Başlığı
@@ -466,10 +450,8 @@ class OrderManager {
     }
 
     async printOrder() {
-        console.log('Yazdırma başlatıldı');
         
         if (!this.validateForm()) {
-            console.log('Form validation başarısız');
             return;
         }
 
@@ -481,14 +463,10 @@ class OrderManager {
             const customerData = this.getCustomerData();
             const orderNumber = this.generateOrderNumber();
             
-            console.log('Yazdırma için müşteri verileri:', customerData);
-            console.log('Yazdırma için sipariş numarası:', orderNumber);
-            console.log('Yazdırma için calculations:', this.calculations);
             
             // Yazdırılabilir HTML içeriği oluştur
             const printContent = this.createPrintableHTML(customerData, orderNumber);
             
-            console.log('Print content oluşturuldu');
             
             // Yeni pencere açıp yazdır
             const printWindow = window.open('', '_blank');
@@ -501,20 +479,16 @@ class OrderManager {
             printWindow.document.close();
             
             printWindow.onload = function() {
-                console.log('Print window yüklendi, yazdırma başlatılıyor');
                 printWindow.print();
                 printWindow.onafterprint = function() {
-                    console.log('Yazdırma tamamlandı, pencere kapatılıyor');
                     printWindow.close();
                 };
             };
             
-            console.log('Yazdırma işlemi başarıyla başlatıldı');
 
             this.closeOrderModal();
             
         } catch (error) {
-            console.error('Yazdırma hatası:', error);
             alert('Yazdırma sırasında hata oluştu: ' + error.message);
         }
     }

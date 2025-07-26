@@ -62,7 +62,6 @@ async function initializeApp() {
     const quantityInput = document.getElementById('quantity');
 
     if (!fabricTypeSelect) {
-        console.error('Kritik form alanları bulunamadı!');
     }
 
     // Navigation Elements
@@ -241,7 +240,6 @@ async function initializeApp() {
             const createdDate = settings.created_at ? new Date(settings.created_at).toLocaleDateString('tr-TR') : '-';
             const updatedDate = settings.updated_at ? new Date(settings.updated_at).toLocaleDateString('tr-TR') : '-';
             
-            console.log('Creating row for settings:', settings);
             row.innerHTML = `
                 <td>${settings.id || index + 1}</td>
                 <td>${settings.fixed_cost_per_unit || 25}₺</td>
@@ -257,7 +255,6 @@ async function initializeApp() {
             `;
             costSettingsTable.appendChild(row);
         });
-        console.log('costSettingsTable güncellenmiş HTML:', costSettingsTable.innerHTML);
     }
 
     function renderCalculationResult() {

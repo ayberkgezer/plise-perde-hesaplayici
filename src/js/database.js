@@ -47,14 +47,11 @@ class DatabaseManager {
             
             // Yazma izni kontrol et
             fs.accessSync(dbDir, fs.constants.W_OK);
-            console.log('Veritabanı klasörü hazır:', dbDir);
         } catch (error) {
-            console.warn('Veritabanı klasörü oluşturulamadı veya yazma izni yok:', error.message);
             
             // Hata durumunda userData klasörüne geç
             if (app) {
                 const fallbackPath = path.join(app.getPath('userData'), 'database.sqlite');
-                console.log('Alternatif yol kullanılıyor:', fallbackPath);
                 this.dbPath = fallbackPath;
                 
                 const fallbackDir = path.dirname(fallbackPath);
@@ -73,17 +70,13 @@ class DatabaseManager {
             
             this.db = new sqlite3.Database(this.dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
                 if (err) {
-                    console.error('Veritabanı bağlantı hatası:', err.message);
-                    console.error('Veritabanı yolu:', this.dbPath);
                     reject(err);
                 } else {
-                    console.log('Veritabanı başarıyla açıldı:', this.dbPath);
                     this.initializeTables()
                         .then(() => {
                             resolve();
                         })
                         .catch((initErr) => {
-                            console.error('Tablo başlatma hatası:', initErr);
                             reject(initErr);
                         });
                 }
@@ -156,7 +149,6 @@ class DatabaseManager {
                     if (hasError) return; // Zaten hata varsa devam etme
                     
                     if (err) {
-                        console.error(`Tablo oluşturma hatası ${index}:`, err.message);
                         hasError = true;
                         reject(err);
                     } else {
@@ -216,7 +208,6 @@ class DatabaseManager {
                     if (hasError) return;
                     
                     if (err) {
-                        console.error(`Trigger oluşturma hatası ${index}:`, err.message);
                         // Trigger hataları kritik olmayabilir, ancak logla
                     }
                     
@@ -235,7 +226,6 @@ class DatabaseManager {
             // Önce sütunun var olup olmadığını kontrol et
             this.db.all("PRAGMA table_info(cost_settings)", (err, columns) => {
                 if (err) {
-                    console.error('Schema kontrol hatası:', err);
                     reject(err);
                     return;
                 }
@@ -243,21 +233,17 @@ class DatabaseManager {
                 const hasPliseColumn = columns.some(col => col.name === 'plise_cutting_multiplier');
                 
                 if (!hasPliseColumn) {
-                    console.log('plise_cutting_multiplier sütunu ekleniyor...');
                     this.db.run(
                         "ALTER TABLE cost_settings ADD COLUMN plise_cutting_multiplier REAL NOT NULL DEFAULT 2.1",
                         (alterErr) => {
                             if (alterErr) {
-                                console.error('Sütun ekleme hatası:', alterErr);
                                 reject(alterErr);
                             } else {
-                                console.log('plise_cutting_multiplier sütunu başarıyla eklendi');
                                 resolve();
                             }
                         }
                     );
                 } else {
-                    console.log('plise_cutting_multiplier sütunu zaten mevcut');
                     resolve();
                 }
             });
@@ -378,7 +364,6 @@ class DatabaseManager {
         return new Promise((resolve, reject) => {
             this.db.get("SELECT * FROM cost_settings ORDER BY id DESC LIMIT 1", (err, row) => {
                 if (err) {
-                    console.error('getCostSettings error:', err);
                     reject(err);
                 } else {
                     const result = row || { 
@@ -400,7 +385,6 @@ class DatabaseManager {
             // Önce mevcut kayıt var mı kontrol et
             db.get("SELECT id FROM cost_settings ORDER BY id DESC LIMIT 1", (err, row) => {
                 if (err) {
-                    console.error('SELECT error:', err);
                     reject(err);
                     return;
                 }
@@ -412,7 +396,6 @@ class DatabaseManager {
                         [fixedCostPerUnit, aluminiumCostPerCm, pliseCuttingMultiplier, row.id],
                         function(updateErr) {
                             if (updateErr) {
-                                console.error('UPDATE error:', updateErr);
                                 reject(updateErr);
                             } else {
                                 resolve();
@@ -426,7 +409,6 @@ class DatabaseManager {
                         [fixedCostPerUnit, aluminiumCostPerCm, pliseCuttingMultiplier],
                         function(insertErr) {
                             if (insertErr) {
-                                console.error('INSERT error:', insertErr);
                                 reject(insertErr);
                             } else {
                                 resolve();
@@ -518,7 +500,6 @@ class DatabaseManager {
         return new Promise((resolve, reject) => {
             this.db.get("SELECT * FROM company_info WHERE is_active = 1 ORDER BY id DESC LIMIT 1", (err, row) => {
                 if (err) {
-                    console.error('getCompanyInfo error:', err);
                     reject(err);
                 } else {
                     resolve(row || null);
@@ -534,7 +515,6 @@ class DatabaseManager {
             // Önce mevcut aktif firmaları pasif yap
             this.db.run("UPDATE company_info SET is_active = 0", (err) => {
                 if (err) {
-                    console.error('Update existing companies error:', err);
                     reject(err);
                     return;
                 }
@@ -547,7 +527,6 @@ class DatabaseManager {
                     [company_name, contact_person, phone, email, address, website, tax_number],
                     function(err) {
                         if (err) {
-                            console.error('Insert company error:', err);
                             reject(err);
                         } else {
                             resolve({ id: this.lastID, ...companyData });
@@ -570,7 +549,6 @@ class DatabaseManager {
                 [company_name, contact_person, phone, email, address, website, tax_number, id],
                 (err) => {
                     if (err) {
-                        console.error('Update company error:', err);
                         reject(err);
                     } else {
                         resolve({ id, ...companyData });
@@ -622,7 +600,6 @@ class DatabaseManager {
             if (this.db) {
                 this.db.close((err) => {
                     if (err) {
-                        console.error('Veritabanı kapatma hatası:', err.message);
                         reject(err);
                     } else {
                         resolve();
