@@ -127,7 +127,7 @@ function exportData() {
         a.click();
         
 
-    }).catch(error => {
+    }).catch(() => {
 
     });
 }
@@ -237,23 +237,19 @@ function openExternal(url) {
     }
 }
 
-function copyToClipboard(text, message = 'Kopyalandı!') {
+function copyToClipboard(text) {
     if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(text).then(() => {
-
-
-            } else {
-
-            }
-        }).catch(err => {
-            fallbackCopyTextToClipboard(text, message);
+            console.log('Kopyalandı: ' + text);
+        }).catch(() => {
+            fallbackCopyTextToClipboard(text);
         });
     } else {
-        fallbackCopyTextToClipboard(text, message);
+        fallbackCopyTextToClipboard(text);
     }
 }
 
-function fallbackCopyTextToClipboard(text, message) {
+function fallbackCopyTextToClipboard(text) {
     const textArea = document.createElement("textarea");
     textArea.value = text;
     textArea.style.top = "0";
@@ -264,14 +260,14 @@ function fallbackCopyTextToClipboard(text, message) {
     textArea.select();
     
     try {
-        document.execCommand('copy');
-
-
+        const successful = document.execCommand('copy');
+        if (successful) {
+            console.log('Kopyalandı: ' + text);
         } else {
-
+            console.log('Kopyalama başarısız');
         }
     } catch (err) {
-
+        console.log('Kopyalama hatası: ' + err);
     }
     
     document.body.removeChild(textArea);
@@ -348,15 +344,31 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (minimizeBtn) {
             minimizeBtn.addEventListener('click', minimizeWindow);
+            minimizeBtn.style.pointerEvents = 'auto';
+            minimizeBtn.style.cursor = 'pointer';
         }
         
         if (maximizeBtn) {
             maximizeBtn.addEventListener('click', maximizeWindow);
+            maximizeBtn.style.pointerEvents = 'auto';
+            maximizeBtn.style.cursor = 'pointer';
         }
         
         if (closeBtn) {
             closeBtn.addEventListener('click', closeWindow);
+            closeBtn.style.pointerEvents = 'auto';
+            closeBtn.style.cursor = 'pointer';
         }
+        
+        // Ensure buttons are clickable and visible
+        [minimizeBtn, maximizeBtn, closeBtn].forEach(btn => {
+            if (btn) {
+                btn.style.opacity = '1';
+                btn.style.visibility = 'visible';
+                btn.style.display = 'flex';
+                btn.disabled = false;
+            }
+        });
     }
     
     // Add tooltips to buttons
@@ -393,25 +405,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-
-// Desktop controls module for Electron app
-// This module is automatically loaded and doesn't need CommonJS exports
-
-// Window control functions
-function minimizeWindow() {
-    if (window.electronAPI && window.electronAPI.minimizeWindow) {
-        window.electronAPI.minimizeWindow();
-    }
-}
-
-function maximizeWindow() {
-    if (window.electronAPI && window.electronAPI.maximizeWindow) {
-        window.electronAPI.maximizeWindow();
-    }
-}
-
-function closeWindow() {
-    if (window.electronAPI && window.electronAPI.closeWindow) {
-        window.electronAPI.closeWindow();
-    }
-}

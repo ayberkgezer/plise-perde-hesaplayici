@@ -1379,6 +1379,8 @@ body {
 .platform-windows .title-bar-btn {
     opacity: 1 !important;
     visibility: visible !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
 }
 
 /* Default title bar controls visibility (before platform detection) */
@@ -1391,6 +1393,9 @@ body:not(.platform-macos) .title-bar-btn {
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    user-select: none !important;
 }
 
 /* Status Bar - Yeni stil */
