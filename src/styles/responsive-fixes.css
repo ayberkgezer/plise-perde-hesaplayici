@@ -1,0 +1,214 @@
+/* Windows ve Cross-Platform Uyumluluk Düzeltmeleri */
+
+/* Global scroll davranışı - Tüm tarayıcılar */
+* {
+    /* Scroll performansı için GPU hızlandırma */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* Ana scroll container optimizasyonu */
+body, html {
+    /* Edge/IE scroll düzeltmesi */
+    -ms-scroll-chaining: none;
+    -ms-overflow-style: scrollbar;
+    /* Firefox scroll optimizasyonu */
+    scrollbar-width: thin;
+    /* Momentum scrolling - iOS/macOS */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Windows High DPI desteği */
+@media screen and (-webkit-min-device-pixel-ratio: 1.25), 
+       screen and (min-resolution: 120dpi) {
+    :root {
+        --scrollbar-width: 14px;
+        --touch-target-min: 48px;
+    }
+    
+    /* Touch hedefleri Windows'ta daha büyük */
+    .modern-btn, .modern-input, .modern-select {
+        min-height: var(--touch-target-min);
+    }
+    
+    /* Scrollbar boyutları */
+    ::-webkit-scrollbar {
+        width: var(--scrollbar-width) !important;
+        height: var(--scrollbar-width) !important;
+    }
+}
+
+/* Windows scaling desteği */
+@media screen and (-webkit-min-device-pixel-ratio: 1.5), 
+       screen and (min-resolution: 144dpi) {
+    :root {
+        --scrollbar-width: 16px;
+        --font-scale: 1.1;
+    }
+    
+    body {
+        font-size: calc(var(--font-size-base) * var(--font-scale));
+    }
+}
+
+/* Edge tarayıcısı özel düzeltmeleri */
+@supports (-ms-ime-align: auto) {
+    .table-container, .cost-table-wrapper {
+        -ms-overflow-style: -ms-autohiding-scrollbar;
+    }
+    
+    /* Edge'de scroll bar gizleme sorunu */
+    .view::-ms-scrollbar {
+        width: 12px;
+        background: var(--background-secondary);
+    }
+    
+    .view::-ms-scrollbar-thumb {
+        background: var(--primary-color);
+        border-radius: 6px;
+    }
+}
+
+/* Firefox özel scroll ayarları */
+@-moz-document url-prefix() {
+    /* Firefox'ta smooth scroll */
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    /* Firefox scrollbar renkleri */
+    .table-container, .cost-table-wrapper, .view {
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary-color) var(--background-secondary);
+    }
+    
+    /* Firefox'ta scroll performance */
+    .table-container, .cost-table-wrapper {
+        will-change: scroll-position;
+    }
+}
+
+/* Chrome/Edge Chromium scroll optimizasyonu */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    .table-container::-webkit-scrollbar-track,
+    .cost-table-wrapper::-webkit-scrollbar-track {
+        background: var(--background-secondary);
+        border: 1px solid var(--border-light);
+        border-radius: 6px;
+    }
+    
+    .table-container::-webkit-scrollbar-thumb,
+    .cost-table-wrapper::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        border: 2px solid var(--background-secondary);
+        border-radius: 6px;
+        min-height: 40px; /* Windows için minimum thumb boyutu */
+    }
+    
+    .table-container::-webkit-scrollbar-thumb:active,
+    .cost-table-wrapper::-webkit-scrollbar-thumb:active {
+        background: var(--primary-dark);
+    }
+}
+
+/* Safari özel düzeltmeleri */
+@media not all and (min-resolution:.001dpcm) {
+    @supports (-webkit-appearance:none) {
+        .table-container, .cost-table-wrapper {
+            -webkit-overflow-scrolling: touch;
+        }
+    }
+}
+
+/* Ultra geniş ekranlar için özel düzenlemeler */
+@media screen and (min-width: 2560px) {
+    :root {
+        --max-content-width: 1800px;
+    }
+    
+    #app-container {
+        max-width: var(--max-content-width);
+        margin: 0 auto;
+        padding: var(--space-lg) calc((100vw - var(--max-content-width)) / 2);
+    }
+    
+    .table-container, .cost-table-wrapper {
+        max-height: 60vh;
+    }
+}
+
+/* Yüksek refreshrate ekranlar */
+@media screen and (min-refresh-rate: 90hz) {
+    * {
+        /* Smooth animasyonlar için */
+        transition-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+    
+    .table-container, .cost-table-wrapper {
+        scroll-behavior: smooth;
+        /* GPU accelerated scrolling */
+        will-change: scroll-position;
+        transform: translateZ(0);
+    }
+}
+
+/* Windows 10/11 Fluent Design uyumu */
+@media screen and (prefers-color-scheme: light) {
+    :root {
+        --glass-effect: rgba(255, 255, 255, 0.7);
+        --backdrop-blur: 20px;
+    }
+    
+    .table-container, .cost-table-wrapper {
+        backdrop-filter: blur(var(--backdrop-blur));
+        -webkit-backdrop-filter: blur(var(--backdrop-blur));
+        background: var(--glass-effect);
+    }
+}
+
+/* Düşük performanslı cihazlar için optimizasyon */
+@media (prefers-reduced-motion: reduce) {
+    .table-container, .cost-table-wrapper {
+        scroll-behavior: auto;
+        transition: none;
+    }
+    
+    * {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* Kritik hata düzeltmeleri */
+.table-container, .cost-table-wrapper {
+    /* Scroll kaybolma sorunu önleme */
+    overflow: auto !important;
+    /* Minimum scroll alanı garantisi */
+    min-height: 200px;
+    /* Content overflow kontrolü */
+    word-break: break-word;
+    /* Touch scroll desteği */
+    -webkit-overflow-scrolling: touch;
+    /* Modern scroll snap */
+    scroll-snap-type: both proximity;
+}
+
+/* Scroll visibility güvencesi */
+.table-container::-webkit-scrollbar,
+.cost-table-wrapper::-webkit-scrollbar {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Print media scroll gizleme */
+@media print {
+    .table-container, .cost-table-wrapper {
+        overflow: visible !important;
+        max-height: none !important;
+    }
+    
+    ::-webkit-scrollbar {
+        display: none;
+    }
+}
