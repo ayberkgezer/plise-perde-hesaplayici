@@ -382,7 +382,16 @@ async function initializeApp() {
         const quantity = parseInt(quantityInput.value);
 
         if (!fabricId || isNaN(width) || isNaN(height) || isNaN(quantity)) {
-
+            // Eksik bilgi uyarısı
+            if (!fabricId) {
+                showCalculatorNotification('Lütfen kumaş türünü seçin!', 'error');
+            } else if (isNaN(width) || width <= 0) {
+                showCalculatorNotification('Lütfen geçerli bir genişlik girin!', 'error');
+            } else if (isNaN(height) || height <= 0) {
+                showCalculatorNotification('Lütfen geçerli bir yükseklik girin!', 'error');
+            } else if (isNaN(quantity) || quantity <= 0) {
+                showCalculatorNotification('Lütfen geçerli bir adet girin!', 'error');
+            }
             return;
         }
 
@@ -482,6 +491,9 @@ async function initializeApp() {
                     widthInput.select(); // Windows'ta metin seçimi için
                 }
             }, 200);
+            
+            // Başarı bildirimi göster
+            showCalculatorNotification('Hesaplama başarılı!', 'success');
 
         } catch (error) {
 
@@ -491,7 +503,7 @@ async function initializeApp() {
     // --- Cost Analysis Functions ---
     async function calculateCostAnalysis() {
         if (calculations.length === 0) {
-
+            showCalculatorNotification('Önce hesaplama yapın!', 'error');
             return;
         }
 
@@ -527,6 +539,9 @@ async function initializeApp() {
                     block: 'start' 
                 });
             }, 100);
+            
+            // Maliyet analizi bildirimi göster
+            showCalculatorNotification('Maliyet analizi tamamlandı!', 'info');
             
 
         } catch (error) {
@@ -622,6 +637,43 @@ async function initializeApp() {
         }
 
     };
+
+    // --- Notification Functions ---
+    function showCalculatorNotification(message, type = 'success') {
+        const notification = document.getElementById('calculatorNotification');
+        const textElement = notification.querySelector('.notification-text');
+        const iconElement = notification.querySelector('.notification-icon');
+        
+        if (!notification || !textElement || !iconElement) return;
+        
+        // Mesaj ve icon ayarla
+        textElement.textContent = message;
+        
+        // Type'a göre icon ve renk ayarla
+        if (type === 'success') {
+            iconElement.textContent = '✓';
+            notification.querySelector('.notification-content').style.background = 
+                'linear-gradient(135deg, var(--success-color), var(--success-dark))';
+        } else if (type === 'error') {
+            iconElement.textContent = '✗';
+            notification.querySelector('.notification-content').style.background = 
+                'linear-gradient(135deg, var(--danger-color), var(--danger-dark))';
+        } else if (type === 'info') {
+            iconElement.textContent = 'ℹ';
+            notification.querySelector('.notification-content').style.background = 
+                'linear-gradient(135deg, var(--primary-color), var(--primary-dark))';
+        }
+        
+        // Bildirimi göster
+        notification.classList.add('show');
+        
+        // Type'a göre görüntüleme süresi ayarla
+        const duration = type === 'error' ? 4000 : 3000; // Hata mesajları daha uzun
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, duration);
+    }
 
     // --- Global Functions (called from HTML) ---
     window.editFabric = async function(id) {

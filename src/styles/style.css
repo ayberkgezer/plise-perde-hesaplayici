@@ -1451,6 +1451,62 @@ body:not(.platform-macos) .title-bar-btn {
     box-shadow: 0 0 5px var(--success-color);
 }
 
+/* Hesaplayıcı Bildirimleri */
+.calculator-notification {
+    position: fixed;
+    top: 120px;
+    right: 20px;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateX(100%) scale(0.8);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+.calculator-notification.show {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+}
+
+.notification-content {
+    background: linear-gradient(135deg, var(--success-color), var(--success-dark));
+    color: white;
+    padding: 12px 20px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 200px;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.notification-icon {
+    font-size: 16px;
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.notification-text {
+    flex: 1;
+}
+
+/* Platform specific positioning */
+.platform-macos .calculator-notification {
+    top: 100px; /* macOS için traffic lights'tan kaçın */
+}
+
+.platform-windows .calculator-notification {
+    top: 120px; /* Windows için title bar'dan kaçın */
+}
+
 /* Responsive Design - DPI/Scale Uyumlu */
 @media screen and (min-width: 1440px) {
     :root {

@@ -10,7 +10,8 @@
 
 /* Hesaplama Özeti */
 .calculation-summary {
-    margin-top: 20px;
+    margin-top: 12px;
+    margin-bottom: 16px;
     display: flex;
     justify-content: center;
 }
@@ -18,14 +19,15 @@
 .price-summary-card {
     background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
     color: white;
-    padding: 12px 24px;
-    border-radius: 10px;
-    font-size: 16px;
-    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
     text-align: center;
-    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-    min-width: 250px;
+    box-shadow: 0 2px 6px rgba(76, 175, 80, 0.2);
+    min-width: 160px;
     transition: all 0.3s;
+    display: inline-block;
 }
 
 .price-summary-card:hover {
@@ -238,8 +240,8 @@
     }
     
     .price-summary-card {
-        font-size: 18px;
-        padding: 12px 24px;
+        font-size: 14px;
+        padding: 8px 16px;
         min-width: auto;
     }
 }
@@ -293,8 +295,8 @@
     }
     
     .price-summary-card {
-        font-size: clamp(20px, 1.4vw, 24px);
-        padding: clamp(16px, 1.5vw, 22px) clamp(32px, 2.5vw, 44px);
+        font-size: clamp(14px, 1vw, 16px);
+        padding: clamp(6px, 0.8vw, 10px) clamp(12px, 1.2vw, 18px);
         min-width: auto;
     }
 }
