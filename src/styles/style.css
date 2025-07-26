@@ -208,7 +208,7 @@ input:focus, textarea:focus, select:focus {
 .title-bar-text {
     font-size: 14px;
     font-weight: 600;
-    margin-left: 5px;
+    text-align: center;
 }
 
 .title-bar-controls {
@@ -1332,12 +1332,21 @@ body {
 
 /* Windows Specific Styles */
 .platform-windows .title-bar {
-    justify-content: space-between;
+    justify-content: center;
+    position: relative;
+}
+
+.platform-windows .title-bar-text {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
 }
 
 .platform-windows .title-bar-controls {
     display: flex;
     align-items: center;
+    margin-left: auto;
     -webkit-app-region: no-drag;
 }
 
