@@ -111,60 +111,13 @@ class OrderManager {
         this.updateCalculations();
         
         if (this.orderModal) {
-            this.orderModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            // Input elemanlarının user-select özelliğini sıfırla - Windows uyumlu
-            setTimeout(() => {
-                const inputs = this.orderModal.querySelectorAll('input, textarea, select');
-                inputs.forEach(input => {
-                    // Temel stil ayarları
-                    input.style.userSelect = 'text';
-                    input.style.webkitUserSelect = 'text';
-                    input.style.mozUserSelect = 'text';
-                    input.style.msUserSelect = 'text';
-                    input.style.pointerEvents = 'auto';
-                    input.style.cursor = 'text';
-                    
-                    // Windows için özel ayarlar
-                    input.style.webkitAppearance = 'none';
-                    input.style.appearance = 'none';
-                    input.style.msTouchAction = 'manipulation';
-                    input.style.touchAction = 'manipulation';
-                    
-                    // Disabled ve readonly durumlarını temizle
-                    input.removeAttribute('disabled');
-                    input.removeAttribute('readonly');
-                    input.tabIndex = 0;
-                    
-                    // Event listener'lar ekle
-                    input.addEventListener('click', function() {
-                        this.focus();
-                        if (this.type !== 'select-one') {
-                            this.select();
-                        }
-                    });
-                    
-                    input.addEventListener('focus', function() {
-                        this.style.pointerEvents = 'auto';
-                        this.style.userSelect = 'text';
-                        this.style.webkitUserSelect = 'text';
-                        this.style.mozUserSelect = 'text';
-                        this.style.msUserSelect = 'text';
-                    });
-                    
-                    input.addEventListener('mousedown', function(e) {
-                        e.stopPropagation();
-                    });
-                });
-            }, 100);
+            toggleModal('orderModal', true);
         }
     }
 
     closeOrderModal() {
         if (this.orderModal) {
-            this.orderModal.classList.remove('active');
-            document.body.style.overflow = 'auto';
+            toggleModal('orderModal', false);
             this.resetForm();
         }
     }

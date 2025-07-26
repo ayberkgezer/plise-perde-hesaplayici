@@ -689,46 +689,18 @@ async function initializeApp() {
         }, 3000);
     }
     
-    // Windows uyumluluğu için input focus düzeltmesi
-    function fixInputFocus() {
-        const allInputs = document.querySelectorAll('input, select, textarea');
-        allInputs.forEach(input => {
-            if (input) {
-                // Tüm kısıtlamaları kaldır
-                input.style.pointerEvents = 'auto';
-                input.style.userSelect = 'text';
-                input.style.webkitUserSelect = 'text';
-                input.tabIndex = input.tabIndex || 0;
-                input.removeAttribute('disabled');
-                input.removeAttribute('readonly');
-                
-                // Event listener'ları yeniden etkinleştir
-                if (input.type !== 'hidden') {
-                    input.addEventListener('focus', function() {
-                        this.style.pointerEvents = 'auto';
-                    });
-                    input.addEventListener('click', function() {
-                        this.focus();
-                    });
-                }
+    // --- Modal Functions ---
+    function toggleModal(modalId, show) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            if (show) {
+                modal.classList.add('active');
+                document.body.classList.add('modal-open');
+            } else {
+                modal.classList.remove('active');
+                document.body.classList.remove('modal-open');
             }
-        });
-        
-        // Button'ları da kontrol et
-        const allButtons = document.querySelectorAll('button');
-        allButtons.forEach(button => {
-            if (button) {
-                button.style.pointerEvents = 'auto';
-                button.removeAttribute('disabled');
-            }
-        });
-    }
-    
-    // Her işlemden sonra input focus'unu düzelt
-    function scheduleInputFix() {
-        setTimeout(fixInputFocus, 100);
-        setTimeout(fixInputFocus, 300); // Ekstra güvenlik
-        setTimeout(fixInputFocus, 600); // Çok ekstra güvenlik
+        }
     }
 
     // --- Event Listeners ---
@@ -881,7 +853,7 @@ async function initializeApp() {
 
     // --- About Page Functions ---
     function showAboutPage() {
-        switchView('about');
+        toggleModal('about-modal', true);
     }
 
     // Web sitesi açma fonksiyonu
@@ -948,69 +920,6 @@ async function initializeApp() {
         await loadCostSettings();
         await loadCalculations();
         switchView('calculator');
-        
-        // Windows uyumluluğu için input alanlarını optimize et
-        function fixInputFocus() {
-            const allInputs = document.querySelectorAll('input, select, textarea');
-            allInputs.forEach(input => {
-                if (input) {
-                    // Temel stil ayarları
-                    input.style.pointerEvents = 'auto';
-                    input.style.userSelect = 'text';
-                    input.style.webkitUserSelect = 'text';
-                    input.style.mozUserSelect = 'text';
-                    input.style.msUserSelect = 'text';
-                    input.style.cursor = 'text';
-                    
-                    // Windows için özel ayarlar
-                    input.style.webkitAppearance = 'none';
-                    input.style.appearance = 'none';
-                    input.style.msTouchAction = 'manipulation';
-                    input.style.touchAction = 'manipulation';
-                    
-                    input.tabIndex = input.tabIndex || 0;
-                    input.removeAttribute('disabled');
-                    input.removeAttribute('readonly');
-                    
-                    // Event listener'ları ekle
-                    if (input.type !== 'hidden') {
-                        input.addEventListener('click', function() {
-                            this.focus();
-                            if (this.type !== 'select-one') {
-                                this.select(); // Windows'ta metin seçimi
-                            }
-                        });
-                        
-                        input.addEventListener('focus', function() {
-                            this.style.pointerEvents = 'auto';
-                            this.style.userSelect = 'text';
-                            this.style.webkitUserSelect = 'text';
-                            this.style.mozUserSelect = 'text';
-                            this.style.msUserSelect = 'text';
-                        });
-                        
-                        input.addEventListener('mousedown', function(e) {
-                            e.stopPropagation();
-                        });
-                    }
-                }
-            });
-        }
-        
-        setTimeout(() => {
-            fixInputFocus(); // İlk kontrolü yap
-        }, 500);
-        
-        // DOM değişikliklerini izle ve input focus sorunlarını düzelt
-        const observer = new MutationObserver(() => {
-            setTimeout(fixInputFocus, 100); // Kısa bir gecikme ile çalıştır
-        });
-        observer.observe(document.body, { 
-            childList: true, 
-            subtree: true, 
-            attributes: true,
-            attributeFilter: ['disabled', 'readonly', 'style', 'class']
-        });
         
         // Auto-focus on width input
         if (widthInput) {

@@ -102,15 +102,13 @@ class CustomerInfoManager {
         this.updateCalculations();
         
         if (this.customerInfoModal) {
-            this.customerInfoModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
+            toggleModal('customerInfoModal', true);
         }
     }
 
     closeCustomerInfoModal() {
         if (this.customerInfoModal) {
-            this.customerInfoModal.classList.remove('active');
-            document.body.style.overflow = 'auto';
+            toggleModal('customerInfoModal', false);
             this.resetForm();
         }
     }

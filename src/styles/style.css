@@ -150,6 +150,19 @@ body {
     box-sizing: border-box;
 }
 
+/* Modal açıkken arkaplanı dondur */
+body.modal-open #app-container {
+    pointer-events: none;
+    filter: blur(4px);
+}
+
+/* Modalın kendisi ve içeriği tıklanabilir kalsın */
+body.modal-open .order-modal,
+body.modal-open .about-modal {
+    pointer-events: auto;
+}
+
+
 /* Input elemanları için seçilebilir metin ve Windows uyumluluğu */
 input, textarea, select {
     user-select: text !important;
