@@ -113,6 +113,7 @@
 .icon-save::before { content: "💾"; }
 .icon-edit::before { content: "✏️"; }
 .icon-times::before { content: "❌"; }
+.icon-user::before { content: "👤"; }
 
 /* Reset & Base Styles */
 * {
@@ -546,6 +547,11 @@ body {
 .modern-btn.primary {
     background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary-color) 100%);
     box-shadow: var(--shadow-accent);
+}
+
+.modern-btn.secondary {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-light) 100%);
+    box-shadow: var(--shadow-md);
 }
 
 .modern-btn.success {

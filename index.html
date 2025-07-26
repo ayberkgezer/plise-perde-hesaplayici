@@ -135,6 +135,9 @@
                             <button id="orderFormBtn" class="primary modern-btn">
                                 <span class="icon icon-save"></span> Fiş Çıkar
                             </button>
+                            <button id="customerInfoBtn" class="secondary modern-btn">
+                                <span class="icon icon-user"></span> Müşteri Bilgi Fişi
+                            </button>
                             <button id="clearAllBtn" class="danger modern-btn">
                                 <span class="icon icon-trash"></span> Temizle
                             </button>
@@ -682,9 +685,35 @@
         </div>
     </div>
 
+    <!-- Müşteri Bilgi Fişi Modal -->
+    <div id="customerInfoModal" class="order-modal">
+        <div class="order-modal-content">
+            <div class="order-modal-header">
+                <h3><span class="icon">👤</span> Müşteri Bilgi Fişi</h3>
+                <button id="closeCustomerInfoModal" class="close-btn">&times;</button>
+            </div>
+            <form id="customerInfoForm" class="order-form">
+                <div class="form-group">
+                    <label for="customerInfoName">Müşteri Ad Soyad *</label>
+                    <input type="text" id="customerInfoName" name="customerInfoName" required class="modern-input" placeholder="Müşteri adı ve soyadı">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="cancelCustomerInfo" class="modern-btn">İptal</button>
+                    <button type="button" id="generateCustomerInfoPDF" class="modern-btn success">
+                        <span class="icon">📄</span> PDF Kaydet
+                    </button>
+                    <button type="button" id="printCustomerInfo" class="modern-btn primary">
+                        <span class="icon">🖨️</span> Yazdır
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="src/js/desktop-controls.js"></script>
     <script src="src/js/company-manager.js"></script>
     <script src="src/js/order-manager.js"></script>
+    <script src="src/js/customer-info-manager.js"></script>
     <script src="renderer.js"></script>
 </body>
 </html>

@@ -132,7 +132,6 @@ class DatabaseManager {
                 )`,
                 
                 // Firma bilgileri tablosu
-                                // Firma bilgileri tablosu
                 `CREATE TABLE IF NOT EXISTS company_info (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     company_name TEXT NOT NULL,
