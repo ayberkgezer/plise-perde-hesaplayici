@@ -328,23 +328,41 @@ async function initializeApp() {
         if (saveFabricBtn) saveFabricBtn.textContent = 'Kumaş Ekle';
         if (cancelEditBtn) cancelEditBtn.style.display = 'none';
         
-        // Input alanlarının focus edilebilirliğini garantile
+        // Input alanlarının focus edilebilirliğini garantile - Windows uyumlu
         setTimeout(() => {
             [fabricNameInput, fabricPriceInput, fabricCostInput].forEach(input => {
                 if (input) {
+                    // Temel özellikleri resetle
                     input.style.pointerEvents = 'auto';
                     input.style.userSelect = 'text';
                     input.style.webkitUserSelect = 'text';
+                    input.style.mozUserSelect = 'text';
+                    input.style.msUserSelect = 'text';
+                    input.style.cursor = 'text';
                     input.tabIndex = 0;
                     input.removeAttribute('disabled');
                     input.removeAttribute('readonly');
                     
+                    // Windows için özel ayarlar
+                    input.style.webkitAppearance = 'none';
+                    input.style.appearance = 'none';
+                    input.style.msTouchAction = 'manipulation';
+                    input.style.touchAction = 'manipulation';
+                    
                     // Event listener'ları yeniden ekle
                     input.addEventListener('focus', function() {
                         this.style.pointerEvents = 'auto';
+                        this.style.userSelect = 'text';
+                        this.style.webkitUserSelect = 'text';
+                        this.style.mozUserSelect = 'text';
+                        this.style.msUserSelect = 'text';
                     });
                     input.addEventListener('click', function() {
                         this.focus();
+                        this.select(); // Windows'ta metin seçimi için
+                    });
+                    input.addEventListener('mousedown', function(e) {
+                        e.stopPropagation();
                     });
                 }
             });
@@ -435,15 +453,33 @@ async function initializeApp() {
             
             showNotification('Hesaplama başarıyla eklendi!', 'success');
             
-            // Form alanlarını temizle ve width input'a odaklan
+            // Form alanlarını temizle ve width input'a odaklan - Windows uyumlu
             widthInput.value = '';
             heightInput.value = '';
             quantityInput.value = '1';
             fabricTypeSelect.selectedIndex = 0;
             
+            // Input alanlarının durumunu resetle - Windows için
+            [widthInput, heightInput, quantityInput].forEach(input => {
+                if (input) {
+                    input.style.pointerEvents = 'auto';
+                    input.style.userSelect = 'text';
+                    input.style.webkitUserSelect = 'text';
+                    input.style.mozUserSelect = 'text';
+                    input.style.msUserSelect = 'text';
+                    input.style.cursor = 'text';
+                    input.removeAttribute('disabled');
+                    input.removeAttribute('readonly');
+                    input.tabIndex = 0;
+                }
+            });
+            
             // Width input'a tekrar odaklan
             setTimeout(() => {
-                widthInput.focus();
+                if (widthInput) {
+                    widthInput.focus();
+                    widthInput.select(); // Windows'ta metin seçimi için
+                }
             }, 200);
 
         } catch (error) {
@@ -913,38 +949,67 @@ async function initializeApp() {
         await loadCalculations();
         switchView('calculator');
         
-        // Windows uyumluluğu için input alanlarını yeniden etkinleştir
-        setTimeout(() => {
+        // Windows uyumluluğu için input alanlarını optimize et
+        function fixInputFocus() {
             const allInputs = document.querySelectorAll('input, select, textarea');
             allInputs.forEach(input => {
                 if (input) {
+                    // Temel stil ayarları
                     input.style.pointerEvents = 'auto';
                     input.style.userSelect = 'text';
                     input.style.webkitUserSelect = 'text';
+                    input.style.mozUserSelect = 'text';
+                    input.style.msUserSelect = 'text';
+                    input.style.cursor = 'text';
+                    
+                    // Windows için özel ayarlar
+                    input.style.webkitAppearance = 'none';
+                    input.style.appearance = 'none';
+                    input.style.msTouchAction = 'manipulation';
+                    input.style.touchAction = 'manipulation';
+                    
                     input.tabIndex = input.tabIndex || 0;
                     input.removeAttribute('disabled');
                     input.removeAttribute('readonly');
                     
-                    // Click event listener ekle
+                    // Event listener'ları ekle
                     if (input.type !== 'hidden') {
                         input.addEventListener('click', function() {
                             this.focus();
+                            if (this.type !== 'select-one') {
+                                this.select(); // Windows'ta metin seçimi
+                            }
+                        });
+                        
+                        input.addEventListener('focus', function() {
+                            this.style.pointerEvents = 'auto';
+                            this.style.userSelect = 'text';
+                            this.style.webkitUserSelect = 'text';
+                            this.style.mozUserSelect = 'text';
+                            this.style.msUserSelect = 'text';
+                        });
+                        
+                        input.addEventListener('mousedown', function(e) {
+                            e.stopPropagation();
                         });
                     }
                 }
             });
+        }
+        
+        setTimeout(() => {
             fixInputFocus(); // İlk kontrolü yap
         }, 500);
         
         // DOM değişikliklerini izle ve input focus sorunlarını düzelt
         const observer = new MutationObserver(() => {
-            fixInputFocus();
+            setTimeout(fixInputFocus, 100); // Kısa bir gecikme ile çalıştır
         });
         observer.observe(document.body, { 
             childList: true, 
             subtree: true, 
             attributes: true,
-            attributeFilter: ['disabled', 'readonly', 'style']
+            attributeFilter: ['disabled', 'readonly', 'style', 'class']
         });
         
         // Auto-focus on width input

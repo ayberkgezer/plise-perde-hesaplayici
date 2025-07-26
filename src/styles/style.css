@@ -150,6 +150,32 @@ body {
     box-sizing: border-box;
 }
 
+/* Input elemanları için seçilebilir metin ve Windows uyumluluğu */
+input, textarea, select {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    pointer-events: auto !important;
+    cursor: text !important;
+    -webkit-appearance: none;
+    appearance: none;
+    /* Windows için özel ayarlar */
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+}
+
+/* Windows'ta input focus sorunları için */
+input:focus, textarea:focus, select:focus {
+    pointer-events: auto !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    outline: 2px solid var(--primary-color) !important;
+    outline-offset: 1px !important;
+}
+
 .title-bar {
     display: flex;
     justify-content: space-between;
@@ -214,6 +240,7 @@ body {
     gap: var(--space-md);
     padding: var(--space-md);
     padding-top: 42px; /* Title bar yüksekliği kadar boşluk */
+    overflow: hidden;
 }
 
 /* Desktop Sidebar - Daha kompakt ve verimli */
@@ -406,7 +433,7 @@ body {
     background: transparent;
     border: none;
     border-radius: var(--radius-xl);
-    overflow: hidden;
+    overflow: auto;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -417,8 +444,11 @@ body {
     display: none;
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: var(--space-md);
     background: transparent;
+    height: auto;
+    max-height: 100%;
 }
 
 .view.active {
@@ -500,6 +530,17 @@ body {
     font-family: var(--font-family);
     transition: var(--transition);
     min-height: 48px; /* Desktop touch target */
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    cursor: text;
+    pointer-events: auto;
+    /* Windows uyumluluğu için */
+    -webkit-appearance: none;
+    appearance: none;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
 }
 
 .modern-input:focus, .modern-select:focus {
@@ -507,6 +548,12 @@ body {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
     background: var(--surface-color);
+    /* Windows için ekstra focus güvenliği */
+    pointer-events: auto !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
 }
 
 .modern-input::placeholder {
@@ -778,15 +825,17 @@ body {
     }
 }
 
-/* Scrollbar Styling */
+/* Scrollbar Styling - Windows Optimized */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 12px;
+    height: 12px;
+    background: var(--background-secondary);
 }
 
 ::-webkit-scrollbar-track {
     background: var(--background-secondary);
     border-radius: var(--radius-full);
+    border: 1px solid var(--border-light);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -794,10 +843,23 @@ body {
     border-radius: var(--radius-full);
     border: 2px solid var(--background-secondary);
     transition: var(--transition);
+    min-height: 30px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(45deg, var(--primary-dark), var(--secondary-light));
+    cursor: pointer;
+}
+
+::-webkit-scrollbar-corner {
+    background: var(--background-secondary);
+}
+
+/* Windows için body scroll ayarları */
+body {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--background-secondary);
+    -ms-overflow-style: scrollbar;
 }
 
 /* Better total price styling */
@@ -817,7 +879,7 @@ body {
     gap: var(--space-sm);
 }
 
-/* Modern Table Styles */
+/* Modern Table Styles - Windows uyumlu scroll */
 .table-container {
     overflow-x: auto;
     overflow-y: auto;
@@ -826,25 +888,39 @@ body {
     box-shadow: var(--shadow-sm);
     margin: var(--space-md) 0;
     scroll-behavior: smooth;
+    /* Windows için scroll optimizasyonu */
+    -ms-overflow-style: scrollbar;
+    scrollbar-width: thin;
+    position: relative;
 }
 
+/* Windows'ta scroll bar'ların görünürlüğünü sağla */
 .table-container::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 12px;
+    height: 12px;
+    background: var(--background-color);
 }
 
 .table-container::-webkit-scrollbar-track {
     background: var(--background-color);
     border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
 }
 
 .table-container::-webkit-scrollbar-thumb {
-    background: var(--border-color);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     border-radius: var(--radius-sm);
+    border: 2px solid var(--background-color);
+    min-height: 30px;
 }
 
 .table-container::-webkit-scrollbar-thumb:hover {
-    background: var(--text-muted);
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+    cursor: pointer;
+}
+
+.table-container::-webkit-scrollbar-corner {
+    background: var(--background-color);
 }
 
 .modern-table {
@@ -1423,4 +1499,79 @@ body:not(.platform-macos) .title-bar-btn {
     background-color: var(--success-color);
     border-radius: 50%;
     box-shadow: 0 0 5px var(--success-color);
+}
+
+/* 1920x1080 Çözünürlük Optimizasyonu */
+@media screen and (min-width: 1920px) and (min-height: 1080px) {
+    :root {
+        /* Daha büyük ekranlar için font boyutları */
+        --font-size-xs: 13px;
+        --font-size-sm: 15px;
+        --font-size-base: 17px;
+        --font-size-lg: 20px;
+        --font-size-xl: 24px;
+        --font-size-2xl: 30px;
+        --font-size-3xl: 38px;
+        
+        /* Daha büyük spacing */
+        --space-xs: 5px;
+        --space-sm: 10px;
+        --space-md: 18px;
+        --space-lg: 28px;
+        --space-xl: 36px;
+        --space-2xl: 52px;
+        --space-3xl: 68px;
+        --space-4xl: 84px;
+    }
+    
+    .app-container {
+        max-width: none;
+        width: 100%;
+        height: 100vh;
+    }
+    
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: var(--space-xl);
+    }
+    
+    .input-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--space-lg);
+    }
+    
+    .modern-input, .modern-select {
+        min-height: 52px;
+        padding: var(--space-lg);
+        font-size: var(--font-size-base);
+    }
+    
+    .modern-btn {
+        min-height: 52px;
+        padding: var(--space-md) var(--space-2xl);
+        font-size: var(--font-size-base);
+    }
+    
+    .table-container {
+        max-height: 500px;
+    }
+    
+    .cost-table-wrapper {
+        max-height: 500px;
+    }
+    
+    .modern-table th, .modern-table td {
+        padding: var(--space-lg);
+        font-size: var(--font-size-base);
+    }
+    
+    .results-header h2 {
+        font-size: var(--font-size-2xl);
+    }
+    
+    .total-price {
+        font-size: var(--font-size-xl);
+        padding: var(--space-xl) var(--space-2xl);
+    }
 }

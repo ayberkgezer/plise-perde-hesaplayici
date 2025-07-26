@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, shell, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, Menu, shell, ipcMain, dialog, screen } = require('electron');
 const path = require('path');
 const DatabaseManager = require('./src/js/database');
 
@@ -33,13 +33,30 @@ function createSplashWindow() {
 }
 
 function createMainWindow() {
+  // Ekran boyutunu al
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
+  
+  // Windows için optimal boyut hesapla
+  let windowWidth = 1920;
+  let windowHeight = 1080;
+  let shouldMaximize = false;
+  
+  // Eğer ekran 1920x1080'den küçükse, ekranın %90'ını kullan
+  if (screenWidth < 1920 || screenHeight < 1080) {
+    windowWidth = Math.floor(screenWidth * 0.9);
+    windowHeight = Math.floor(screenHeight * 0.9);
+    shouldMaximize = true; // Küçük ekranlarda maksimize et
+  }
+  
   // Platform-specific window options
   const windowOptions = {
-    width: 1400,
-    height: 950,
+    width: windowWidth,
+    height: windowHeight,
     minWidth: 1200,
     minHeight: 800,
     show: false,
+    center: true,
     title: 'Perde Hesaplama',
     webPreferences: {
       nodeIntegration: false,
@@ -76,6 +93,12 @@ function createMainWindow() {
       splashWindow.close();
       splashWindow = null;
     }
+    
+    // Windows için maksimize et (eğer gerekiyorsa)
+    if (shouldMaximize && process.platform === 'win32') {
+      mainWindow.maximize();
+    }
+    
     mainWindow.show();
     mainWindow.focus();
     

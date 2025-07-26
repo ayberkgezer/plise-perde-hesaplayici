@@ -114,12 +114,29 @@
     font-size: 0.9rem;
     transition: all 0.2s ease;
     font-family: inherit;
+    /* Windows uyumluluğu için */
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    pointer-events: auto !important;
+    cursor: text !important;
+    -webkit-appearance: none;
+    appearance: none;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
 }
 
 .modern-input:focus, .modern-textarea:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+    /* Windows için ekstra focus güvenliği */
+    pointer-events: auto !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
 }
 
 .modern-textarea {
@@ -345,5 +362,64 @@
     
     .order-table th, .order-table td {
         padding: 4px 2px;
+    }
+}
+
+/* 1920x1080 Çözünürlük Optimizasyonu */
+@media screen and (min-width: 1920px) and (min-height: 1080px) {
+    .order-modal-content {
+        max-width: 800px;
+        width: 60%;
+        padding: 3rem;
+        max-height: 90vh;
+    }
+    
+    .order-form {
+        gap: 2rem;
+    }
+    
+    .form-row {
+        gap: 1.5rem;
+    }
+    
+    .modern-input, .modern-textarea {
+        padding: 1rem;
+        font-size: 1rem;
+    }
+    
+    .modern-textarea {
+        min-height: 100px;
+    }
+    
+    .modal-actions .modern-btn {
+        padding: 1rem 2rem;
+        font-size: 1rem;
+    }
+    
+    .order-receipt {
+        font-size: 14px;
+        line-height: 1.5;
+        padding: 30mm;
+    }
+    
+    .receipt-header h1 {
+        font-size: 28px;
+    }
+    
+    .order-table {
+        font-size: 12px;
+    }
+    
+    .order-table th, .order-table td {
+        padding: 10px 8px;
+    }
+    
+    .receipt-info {
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .customer-info, .order-info {
+        padding: 15px;
     }
 }
