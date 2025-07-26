@@ -310,14 +310,33 @@ async function initializeApp() {
     }
 
     function resetFabricForm() {
-        if (fabricNameInput) fabricNameInput.value = '';
-        if (fabricPriceInput) fabricPriceInput.value = '';
-        if (fabricCostInput) fabricCostInput.value = '';
+        if (fabricNameInput) {
+            fabricNameInput.value = '';
+            fabricNameInput.removeAttribute('disabled');
+        }
+        if (fabricPriceInput) {
+            fabricPriceInput.value = '';
+            fabricPriceInput.removeAttribute('disabled');
+        }
+        if (fabricCostInput) {
+            fabricCostInput.value = '';
+            fabricCostInput.removeAttribute('disabled');
+        }
         if (editIndexInput) editIndexInput.value = '';
         editingFabricId = null;
         
         if (saveFabricBtn) saveFabricBtn.textContent = 'Kumaş Ekle';
         if (cancelEditBtn) cancelEditBtn.style.display = 'none';
+        
+        // Input alanlarının focus edilebilirliğini garantile
+        setTimeout(() => {
+            [fabricNameInput, fabricPriceInput, fabricCostInput].forEach(input => {
+                if (input) {
+                    input.style.pointerEvents = 'auto';
+                    input.tabIndex = 0;
+                }
+            });
+        }, 100);
     }
 
     // --- Calculation Functions ---
@@ -383,13 +402,29 @@ async function initializeApp() {
             // Tabloyu güncelle
             renderCalculationResult();
             
+            // Yeni eklenen satıra scroll yap
+            setTimeout(() => {
+                const resultTable = document.getElementById('resultTable');
+                if (resultTable && resultTable.lastElementChild) {
+                    resultTable.lastElementChild.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'nearest' 
+                    });
+                }
+            }, 100);
+            
             showNotification('Hesaplama başarıyla eklendi!', 'success');
             
-            // Form alanlarını temizle
+            // Form alanlarını temizle ve width input'a odaklan
             widthInput.value = '';
             heightInput.value = '';
             quantityInput.value = '1';
             fabricTypeSelect.selectedIndex = 0;
+            
+            // Width input'a tekrar odaklan
+            setTimeout(() => {
+                widthInput.focus();
+            }, 200);
 
         } catch (error) {
             showNotification('Hesaplama eklenirken hata oluştu!', 'error');
@@ -427,6 +462,15 @@ async function initializeApp() {
 
             renderCostAnalysis();
             costAnalysisDiv.style.display = 'block';
+            
+            // Maliyet analizi bölümüne scroll yap
+            setTimeout(() => {
+                costAnalysisDiv.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }, 100);
+            
             showNotification('Maliyet analizi hesaplandı!', 'success');
         } catch (error) {
             showNotification('Maliyet analizi hesaplanırken hata oluştu!', 'error');
@@ -588,6 +632,24 @@ async function initializeApp() {
             setTimeout(() => notification.remove(), 300);
         }, 3000);
     }
+    
+    // Windows uyumluluğu için input focus düzeltmesi
+    function fixInputFocus() {
+        const allInputs = document.querySelectorAll('input, select, textarea');
+        allInputs.forEach(input => {
+            if (input) {
+                input.style.pointerEvents = 'auto';
+                input.tabIndex = input.tabIndex || 0;
+                input.removeAttribute('disabled');
+                input.style.userSelect = 'text';
+            }
+        });
+    }
+    
+    // Her işlemden sonra input focus'unu düzelt
+    function scheduleInputFix() {
+        setTimeout(fixInputFocus, 100);
+    }
 
     // --- Event Listeners ---
 
@@ -640,6 +702,14 @@ async function initializeApp() {
 
                 await loadFabricSeries();
                 resetFabricForm();
+                
+                // Form işlemi tamamlandıktan sonra input focus'u sıfırla
+                scheduleInputFix();
+                setTimeout(() => {
+                    if (fabricNameInput) {
+                        fabricNameInput.focus();
+                    }
+                }, 300);
             } catch (error) {
                 showNotification('Kumaş serisi kaydedilirken hata oluştu!', 'error');
             }
@@ -670,6 +740,15 @@ async function initializeApp() {
                 await loadCostSettings();
                 
                 showNotification('Maliyet ayarları başarıyla kaydedildi!', 'success');
+                
+                // Input alanlarını tekrar odaklanabilir hale getir
+                scheduleInputFix();
+                setTimeout(() => {
+                    if (fixedCostPerUnitInput) {
+                        fixedCostPerUnitInput.blur();
+                        fixedCostPerUnitInput.focus();
+                    }
+                }, 300);
             } catch (error) {
                 showNotification('Maliyet ayarları kaydedilirken hata oluştu!', 'error');
             }
@@ -786,11 +865,34 @@ async function initializeApp() {
         await loadCalculations();
         switchView('calculator');
         
+        // Windows uyumluluğu için input alanlarını yeniden etkinleştir
+        setTimeout(() => {
+            const allInputs = document.querySelectorAll('input, select, textarea');
+            allInputs.forEach(input => {
+                if (input) {
+                    input.style.pointerEvents = 'auto';
+                    input.tabIndex = input.tabIndex || 0;
+                    input.removeAttribute('disabled');
+                }
+            });
+        }, 500);
+        
+        // DOM değişikliklerini izle ve input focus sorunlarını düzelt
+        const observer = new MutationObserver(() => {
+            fixInputFocus();
+        });
+        observer.observe(document.body, { 
+            childList: true, 
+            subtree: true, 
+            attributes: true,
+            attributeFilter: ['disabled', 'readonly']
+        });
+        
         // Auto-focus on width input
         if (widthInput) {
             setTimeout(() => {
                 widthInput.focus();
-            }, 500);
+            }, 800);
         }
     } catch (error) {
         showNotification('Uygulama başlatılırken hata oluştu!', 'error');

@@ -89,6 +89,27 @@
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-height: 350px;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+
+.cost-table-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.cost-table-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.cost-table-wrapper::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.cost-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
 }
 
 .cost-table {
