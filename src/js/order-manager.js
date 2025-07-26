@@ -315,25 +315,32 @@ class OrderManager {
         
         // Tablo başlıkları
         pdf.setFontSize(9);
-        const headers = ['Adet', 'Genislik', 'Yukseklik', 'Alan (m²)', 'Kumas', 'Fiyat'];
-        const colWidths = [20, 25, 25, 25, 40, 30];
+        const headers = ['Adet', 'Genislik', 'Yukseklik', 'Alan (m²)', 'Kumas', 'Kesim Plise', 'Fiyat'];
+        const colWidths = [18, 22, 22, 20, 30, 25, 28];
         let xPos = 20;
         
         pdf.setFont(undefined, 'bold');
+        // Başlıkları siyah renkte göster
+        pdf.setTextColor(0, 0, 0);
         headers.forEach((header, index) => {
             pdf.text(header, xPos, yPos);
             xPos += colWidths[index];
         });
         
         // Çizgi
-        pdf.line(20, yPos + 2, 185, yPos + 2);
+        pdf.line(20, yPos + 2, 195, yPos + 2);
         yPos += 8;
         
         // Tablo verileri
         pdf.setFont(undefined, 'normal');
+        pdf.setTextColor(0, 0, 0); // Verileri de siyah renkte göster
         this.calculations.forEach((calc) => {
             xPos = 20;
-            const data = [calc.quantity, calc.width, calc.height, calc.area, calc.fabric, calc.price];
+            // Kesim plise sayısını hesapla (yükseklik * 2.1)
+            const height = parseFloat(calc.height.replace(' cm', '')) || 0;
+            const kesimPlise = height * 2.1;
+
+            const data = [calc.quantity, calc.width, calc.height, calc.area, calc.fabric, kesimPlise.toString(), calc.price];
             
             data.forEach((item, index) => {
                 const text = item.toString();
@@ -350,7 +357,7 @@ class OrderManager {
         
         // Toplam Fiyat
         yPos += 5;
-        pdf.line(20, yPos, 185, yPos);
+        pdf.line(20, yPos, 195, yPos);
         yPos += 8;
         
         pdf.setFont(undefined, 'bold');
@@ -417,6 +424,10 @@ class OrderManager {
         
         let tableRows = '';
         this.calculations.forEach(calc => {
+            // Kesim plise sayısını hesapla (yükseklik * 2.1)
+            const height = parseFloat(calc.height.replace(' cm', '')) || 0;
+            const kesimPlise = Math.ceil(height * 2.1);
+            
             tableRows += `
                 <tr>
                     <td class="text-center">${calc.quantity}</td>
@@ -424,6 +435,7 @@ class OrderManager {
                     <td class="text-center">${calc.height}</td>
                     <td class="text-center">${calc.area}</td>
                     <td>${calc.fabric}</td>
+                    <td class="text-center">${kesimPlise}</td>
                     <td class="text-right">${calc.price}</td>
                 </tr>
             `;
@@ -622,12 +634,13 @@ class OrderManager {
 
                 <table class="order-table">
                     <thead>
-                        <tr>
+                        <tr style="background-color: #000; color: #fff;">
                             <th class="text-center">Adet</th>
                             <th class="text-center">Genişlik (cm)</th>
                             <th class="text-center">Yükseklik (cm)</th>
                             <th class="text-center">Alan (m²)</th>
                             <th>Kumaş Türü</th>
+                            <th class="text-center">Kesim Plise Sayısı</th>
                             <th class="text-right">Fiyat</th>
                         </tr>
                     </thead>
