@@ -503,8 +503,8 @@ class OrderManager {
                 parseFloat(calc.height.replace(' cm', '')) : 
                 parseFloat(calc.height) || 0;
             const multiplier = this.costSettings?.plise_cutting_multiplier || 2.1;
-            const kesimPlise = Math.ceil(height * multiplier);
-            
+            const kesimPlise = (height / multiplier).toFixed(2);
+
             // HTML için veri tiplerini güvenli hale getir
             const safeQuantity = calc.quantity?.toString() || '1';
             const safeWidth = typeof calc.width === 'string' ? calc.width : `${calc.width} cm`;
