@@ -282,7 +282,7 @@ async function initializeApp() {
             const row = document.createElement('tr');
             const fabricName = calc.fabric_name || 'Bilinmiyor';
             const area = calc.area || (calc.width * calc.height) / 10000; // m² cinsinden alan
-            const displayArea = area >= 1 ? area.toFixed(2) : area.toFixed(4); // 1 m²'den büyükse 2 basamak, küçükse 4 basamak
+            const displayArea = area.toFixed(4); // Alan hesaplamaları 4 basamak (0.0000)
             
             row.innerHTML = `
                 <td>${calc.quantity}</td>

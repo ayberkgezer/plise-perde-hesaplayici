@@ -15,7 +15,7 @@ jobs:
         os: [macos-latest, windows-latest]
     
     runs-on: ${{ matrix.os }}
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -34,25 +34,9 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
-    - name: Build for macOS
-      if: matrix.os == 'macos-latest'
-      run: npm run build:mac
-      env:
-        CSC_IDENTITY_AUTO_DISCOVERY: false
-    
     - name: Build for Windows
       if: matrix.os == 'windows-latest'
       run: npm run build:win
-    
-    - name: Upload macOS artifacts
-      if: matrix.os == 'macos-latest'
-      uses: actions/upload-artifact@v4
-      with:
-        name: macos-build
-        path: |
-          dist/*.dmg
-          dist/*.dmg.blockmap
-        retention-days: 30
     
     - name: Upload Windows artifacts
       if: matrix.os == 'windows-latest'
@@ -73,12 +57,6 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-    
-    - name: Download macOS artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: macos-build
-        path: ./release-assets/
     
     - name: Download Windows artifacts
       uses: actions/download-artifact@v4
@@ -104,11 +82,6 @@ jobs:
     if: github.ref == 'refs/heads/main'
     
     steps:
-    - name: Download macOS artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: macos-build
-        path: ./build-files/
     
     - name: Download Windows artifacts
       uses: actions/download-artifact@v4

@@ -366,8 +366,8 @@ class OrderManager {
         
         // Tablo başlıkları
         pdf.setFontSize(9);
-        const headers = ['Adet', 'Genislik', 'Yukseklik', 'Alan (m²)', 'Kumas', 'Kesim Plise', 'Fiyat'];
-        const colWidths = [18, 22, 22, 20, 30, 25, 28];
+        const headers = ['Adet', 'Genislik', 'Yukseklik', 'Alan (m²)', 'Kumas', 'Kesim Plise', 'Alüminyum Kesim', 'Fiyat'];
+        const colWidths = [15, 20, 20, 18, 25, 22, 25, 25];
         let xPos = 20;
         
         pdf.setFont(undefined, 'bold');
@@ -398,13 +398,19 @@ class OrderManager {
             const safeQuantity = calc.quantity?.toString() || '1';
             const safeWidth = typeof calc.width === 'string' ? calc.width : `${calc.width} cm`;
             const safeHeight = typeof calc.height === 'string' ? calc.height : `${calc.height} cm`;
-            const safeArea = typeof calc.area === 'string' ? calc.area : `${calc.area} m²`;
+            const safeArea = typeof calc.area === 'string' ? calc.area : `${parseFloat(calc.area || 0).toFixed(4)} m²`;
             const safeFabric = (calc.fabric_name || calc.fabric)?.toString() || 'Belirtilmemiş';
             const safePrice = typeof calc.total_price === 'string' ? calc.total_price : 
                             (calc.total_price ? `${calc.total_price} TL` : 
-                            (calc.price ? `${calc.price} TL` : 'Fiyat belirtilmemiş'));
+                            (calc.price ? `${calc.price} TL` : 'Fiyat belirtilmemiș'));
             
-            const data = [safeQuantity, safeWidth, safeHeight, safeArea, safeFabric, kesimPlise.toString(), safePrice];
+            // Alüminyum kesim ölçüsü hesapla (genişlik - 0.5 cm)
+            const widthValue = typeof calc.width === 'string' ? 
+                parseFloat(calc.width.replace(' cm', '')) : 
+                parseFloat(calc.width) || 0;
+            const aluminiumCutting = Math.max(0, widthValue - 0.5).toFixed(1);
+            
+            const data = [safeQuantity, safeWidth, safeHeight, safeArea, safeFabric, kesimPlise.toString(), `${aluminiumCutting} cm`, safePrice];
             
             data.forEach((item, index) => {
                 const text = item.toString();
@@ -509,11 +515,17 @@ class OrderManager {
             const safeQuantity = calc.quantity?.toString() || '1';
             const safeWidth = typeof calc.width === 'string' ? calc.width : `${calc.width} cm`;
             const safeHeight = typeof calc.height === 'string' ? calc.height : `${calc.height} cm`;
-            const safeArea = typeof calc.area === 'string' ? calc.area : `${calc.area} m²`;
+            const safeArea = typeof calc.area === 'string' ? calc.area : `${parseFloat(calc.area || 0).toFixed(4)} m²`;
             const safeFabric = (calc.fabric_name || calc.fabric)?.toString() || 'Belirtilmemiş';
             const safePrice = typeof calc.total_price === 'string' ? calc.total_price : 
                             (calc.total_price ? `${calc.total_price} TL` : 
                             (calc.price ? `${calc.price} TL` : 'Fiyat belirtilmemiş'));
+            
+            // Alüminyum kesim ölçüsü hesapla (genişlik - 0.5 cm)
+            const widthValue = typeof calc.width === 'string' ? 
+                parseFloat(calc.width.replace(' cm', '')) : 
+                parseFloat(calc.width) || 0;
+            const aluminiumCutting = Math.max(0, widthValue - 0.5).toFixed(1);
             
             tableRows += `
                 <tr>
@@ -523,6 +535,7 @@ class OrderManager {
                     <td class="text-center">${safeArea}</td>
                     <td>${safeFabric}</td>
                     <td class="text-center">${kesimPlise}</td>
+                    <td class="text-center">${aluminiumCutting} cm</td>
                     <td class="text-right">${safePrice}</td>
                 </tr>
             `;
@@ -728,6 +741,7 @@ class OrderManager {
                             <th class="text-center">Alan (m²)</th>
                             <th>Kumaş Türü</th>
                             <th class="text-center">Kesim Plise Sayısı</th>
+                            <th class="text-center">Alüminyum Kesim (cm)</th>
                             <th class="text-right">Fiyat</th>
                         </tr>
                     </thead>
